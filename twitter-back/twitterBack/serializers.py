@@ -11,6 +11,8 @@ class PostSerializer(serializers.ModelSerializer):
 
 class ReplySerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='profile.username', read_only=True)
+    userat = serializers.CharField(source='user.username', read_only=True)
+
     class Meta:
         model = Reply
         fields = '__all__'

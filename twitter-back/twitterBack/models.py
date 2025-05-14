@@ -1,7 +1,7 @@
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models import TextField
+from django.db.models import TextField, IntegerField
 
 
 # Create your models here.
@@ -16,6 +16,7 @@ class Profile(models.Model):
     posts_liked = ArrayField(models.IntegerField(), blank=True, default=list)
     posts_favourited = ArrayField(models.IntegerField(), blank=True, default=list)
     posts_visited = ArrayField(models.IntegerField(), blank=True, default=list)
+    posts_made = IntegerField(default=0)
     bio = TextField(null=True, blank=True, max_length=120)
 
     def __str__(self):
@@ -33,7 +34,7 @@ class Post(models.Model):
     post_edited = models.BooleanField(default=False)
 
 class Reply(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comment')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='replies')
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     text = models.TextField()

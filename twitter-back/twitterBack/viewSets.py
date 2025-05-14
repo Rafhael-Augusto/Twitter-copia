@@ -1,5 +1,5 @@
+from django.db.models import Func, F, IntegerField
 from rest_framework import viewsets
-from .models import *
 from .serializers import *
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -11,5 +11,5 @@ class ReplyViewSet(viewsets.ModelViewSet):
     serializer_class = ReplySerializer
 
 class ProfileViewSet(viewsets.ModelViewSet):
-    queryset = Profile.objects.all()
+    queryset = Profile.objects.annotate(followers_count=Func(F('followers_ids'), function='CARDINALITY', output_field=IntegerField())).order_by('-followers_count')
     serializer_class = ProfileSerializer

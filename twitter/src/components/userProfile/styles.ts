@@ -5,13 +5,17 @@ interface Props {
   hovercolor: string;
 }
 
-export const Container = styled.div`
+interface Loading {
+  isloaded: string;
+}
+
+export const Container = styled.div<Loading>`
   display: flex;
   flex-direction: column;
   align-items: center;
 
   height: 100vh;
-  width: 100vw;
+  width: 600px;
 
   color: #fff;
   background-color: #000000;
@@ -25,6 +29,19 @@ export const Container = styled.div`
   &::-webkit-scrollbar-track {
     background: transparent;
   }
+
+  transition: all 0.1s ease-in-out;
+
+  opacity: ${(props) => (props.isloaded === "true" ? 1 : 0)};
+`;
+
+export const Background = styled.div`
+  display: flex;
+  justify-content: center;
+  background-color: #000000;
+
+  height: 100vh;
+  width: 100vw;
 `;
 
 export const Wrapper = styled.div`
@@ -239,7 +256,7 @@ export const ContainerDiv = styled.div`
   align-items: center;
   justify-content: center;
 
-  width: 603px;
+  width: 600px;
 
   border: 1px solid #303336;
 `;

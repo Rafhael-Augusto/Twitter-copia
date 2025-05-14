@@ -3,9 +3,11 @@ import axios from "axios";
 
 import CreateNewPost from "../createNewPost/NewPost";
 import Post from "../newPost/Post";
+import WhoToFollow from "../whoToFollow/WhoToFollow";
 import API_BASE_URL from "../../config/api";
 
 import * as S from "./styles";
+import LeftSide from "../leftSide/LeftSide";
 
 type PostApi = {
   id: number;
@@ -18,6 +20,7 @@ type PostApi = {
   user: number;
   username: string;
   user_at: string;
+  post_edited: boolean;
 };
 
 function App() {
@@ -48,6 +51,7 @@ function App() {
 
   return (
     <S.Container>
+      <LeftSide />
       <S.FeedPosts>
         <S.ChangeFeed>
           <S.SelectedFeed onClick={() => setIsForYou(true)} style={forYouStyle}>
@@ -71,6 +75,7 @@ function App() {
             ))
           : ""}
       </S.FeedPosts>
+      <WhoToFollow />
     </S.Container>
   );
 }

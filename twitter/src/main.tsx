@@ -7,12 +7,10 @@ import { GlobalStyle } from "./globalReset.ts";
 import App from "./components/feed/App.tsx";
 import ReadPost from "./components/readPost/ReadPost.tsx";
 import UserProfile from "./components/userProfile/UserProfile.tsx";
-import LeftSide from "./components/leftSide/LeftSide.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Router>
-      <LeftSide />
       <Routes>
         <Route path="/home" element={<App />} />
         <Route

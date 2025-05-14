@@ -38,6 +38,11 @@ export const ProfilePicture = styled.img`
 export const UserName = styled.h1`
   font-size: 19px;
   font-weight: bold;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
   cursor: pointer;
 `;
 

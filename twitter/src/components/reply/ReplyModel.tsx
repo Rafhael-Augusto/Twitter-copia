@@ -11,7 +11,7 @@ type Comment = {
     likes: string;
     post: number;
     user_id: number;
-    user: number;
+    userat: string;
     username: string;
   };
 };
@@ -20,7 +20,7 @@ function ReplyModel({ comment }: Comment) {
   const navigate = useNavigate();
 
   const visitProfile = () => {
-    navigate(`/${comment.user}/${comment.id}/profile`);
+    navigate(`/${comment.userat}/${comment.id}/profile`);
   };
 
   const likeComment = () => {
