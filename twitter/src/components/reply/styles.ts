@@ -19,6 +19,13 @@ export const Container = styled.div`
   &:hover {
     background-color: rgba(255, 255, 255, 0.05);
   }
+
+  @media (max-width: 992px) {
+    width: 500px;
+  }
+  @media (max-width: 480px) {
+    width: 400px;
+  }
 `;
 
 export const ProfileInfo = styled.div`

@@ -105,6 +105,20 @@ export const ImagePreview = styled.img`
   max-width: 560px;
 
   border-radius: 16px;
+
+  @media (max-width: 1200px) {
+    max-width: 460px;
+  }
+  @media (max-width: 992px) {
+    max-width: 440px;
+  }
+
+  @media (max-width: 600px) {
+    max-width: 400px;
+  }
+  @media (max-width: 480px) {
+    max-width: 300px;
+  }
 `;
 
 export const RemovePreviewImage = styled.img`

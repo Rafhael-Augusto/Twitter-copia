@@ -22,6 +22,21 @@ export const Wrapper = styled.li`
   border-right: 1px solid #303336;
 
   transition: all 0.1s ease-in-out;
+
+  @media (max-width: 992px) {
+    width: 500px;
+  }
+  @media (max-width: 768px) {
+    width: 500px;
+  }
+
+  @media (max-width: 600px) {
+    margin-left: 36px;
+  }
+  @media (max-width: 480px) {
+    margin-left: 40px;
+    width: 400px;
+  }
 `;
 
 export const Background = styled.div`
@@ -42,6 +57,16 @@ export const Container = styled.div`
   padding: 20px;
 
   margin-top: 20px;
+
+  @media (max-width: 992px) {
+    width: 500px;
+  }
+  @media (max-width: 768px) {
+    width: 500px;
+  }
+  @media (max-width: 480px) {
+    max-width: 400px;
+  }
 `;
 
 export const ProfileInfo = styled.div`
@@ -73,6 +98,21 @@ export const OptionsDiv = styled.div`
   position: relative;
 
   width: 520px;
+
+  @media (max-width: 992px) {
+    width: 400px;
+  }
+
+  @media (max-width: 768px) {
+    width: 400px;
+  }
+  @media (max-width: 600px) {
+    width: 400px;
+  }
+
+  @media (max-width: 480px) {
+    max-width: 300px;
+  }
 `;
 
 export const ProfilePicture = styled.img`
@@ -212,6 +252,13 @@ export const ReturnHome = styled.div`
     margin-left: 16px;
     cursor: pointer;
   }
+
+  @media (max-width: 992px) {
+    width: 500px;
+  }
+  @media (max-width: 480px) {
+    width: 400px;
+  }
 `;
 
 export const Replies = styled.div`
@@ -232,6 +279,10 @@ export const Div = styled.div`
 
   &::-webkit-scrollbar-track {
     background: transparent;
+  }
+
+  @media (max-width: 992px) {
+    padding-top: 20px;
   }
 `;
 

@@ -33,6 +33,25 @@ export const Container = styled.div<Loading>`
   transition: all 0.1s ease-in-out;
 
   opacity: ${(props) => (props.isloaded === "true" ? 1 : 0)};
+  @media (max-width: 1000px) {
+    margin-left: 0px;
+  }
+
+  @media (max-width: 992px) {
+    width: 500px;
+  }
+
+  @media (max-width: 768px) {
+    width: 1600px;
+  }
+
+  @media (max-width: 600px) {
+    width: 4000px;
+    margin-left: 50px;
+  }
+  @media (max-width: 480px) {
+    width: 100000px;
+  }
 `;
 
 export const Background = styled.div`
@@ -50,12 +69,25 @@ export const Wrapper = styled.div`
   height: 455px;
 
   margin-top: 60px;
+
+  @media (max-width: 992px) {
+    width: 500px;
+  }
+  @media (max-width: 768px) {
+    width: 540px;
+  }
+  @media (max-width: 600px) {
+    width: 470px;
+  }
+  @media (max-width: 480px) {
+    width: 435px;
+  }
 `;
 
 export const Header = styled.header`
   position: fixed;
   background-color: rgba(0, 0, 0, 0.8);
-  width: 598px;
+  width: 600px;
   height: 60px;
 
   top: 0;
@@ -66,6 +98,20 @@ export const Header = styled.header`
   & > div {
     display: flex;
     flex-direction: column;
+  }
+
+  @media (max-width: 1000px) {
+    width: 540px;
+  }
+
+  @media (max-width: 768px) {
+    width: 590px;
+  }
+  @media (max-width: 600px) {
+    width: 500px;
+  }
+  @media (max-width: 480px) {
+    width: 430px;
   }
 `;
 
@@ -91,8 +137,21 @@ export const ProfileBanner = styled.div`
     justify-content: center;
 
     & > img {
-      width: 599px;
+      width: 100%;
     }
+  }
+
+  @media (max-width: 992px) {
+    width: 500px;
+  }
+  @media (max-width: 768px) {
+    width: 540px;
+  }
+  @media (max-width: 600px) {
+    width: 500px;
+  }
+  @media (max-width: 480px) {
+    width: 440px;
   }
 `;
 
@@ -111,6 +170,22 @@ export const ProfilePicture = styled.div`
 
     border: 4px solid #000000;
     object-fit: cover;
+  }
+
+  @media (max-width: 992px) {
+    top: 108px;
+  }
+
+  @media (max-width: 768px) {
+    top: 120px;
+  }
+
+  @media (max-width: 600px) {
+    top: 110px;
+  }
+
+  @media (max-width: 480px) {
+    top: 80px;
   }
 `;
 
@@ -196,6 +271,13 @@ export const EditProfileButton = styled.button`
   }
 
   cursor: pointer;
+
+  @media (max-width: 600px) {
+    margin-right: 70px;
+  }
+  @media (max-width: 480px) {
+    margin-right: 70px;
+  }
 `;
 
 export const SelectButton = styled.button`
@@ -259,6 +341,18 @@ export const ContainerDiv = styled.div`
   width: 600px;
 
   border: 1px solid #303336;
+
+  @media (max-width: 992px) {
+    width: 500px;
+  }
+
+  @media (max-width: 768px) {
+    width: 540px;
+  }
+
+  @media (max-width: 480px) {
+    display: nonen;
+  }
 `;
 
 export const Bio = styled.div`

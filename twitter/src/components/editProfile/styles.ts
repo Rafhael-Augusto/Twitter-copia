@@ -1,6 +1,8 @@
 import styled from "styled-components";
 
 export const Container = styled.div`
+  top: 0;
+  left: 0;
   position: absolute;
 
   display: flex;
@@ -12,7 +14,7 @@ export const Container = styled.div`
   height: 100vh;
   width: 100vw;
 
-  z-index: 5;
+  z-index: 10;
 `;
 
 export const EditContainer = styled.form`
@@ -32,6 +34,19 @@ export const EditContainer = styled.form`
 
   height: 600px;
   width: 600px;
+
+  @media (max-width: 1200) {
+    width: 500px;
+  }
+
+  @media (max-width: 600px) {
+    height: 600px;
+    width: 550px;
+  }
+
+  @media (max-width: 480px) {
+    width: 440px;
+  }
 `;
 
 export const Header = styled.div`
@@ -112,6 +127,10 @@ export const ProfileImages = styled.div`
   border-right: 1px solid #000000;
 
   margin-top: 8px;
+
+  @media (max-width: 1200) {
+    width: 500px;
+  }
 `;
 
 export const ProfilePicture = styled.img`
@@ -142,6 +161,14 @@ export const NewUsername = styled.textarea`
 
   padding: 8px;
   font-size: 16px;
+
+  @media (max-width: 600px) {
+    width: 480px;
+  }
+
+  @media (max-width: 480px) {
+    width: 380px;
+  }
 `;
 
 export const UserBio = styled.textarea`
@@ -158,6 +185,14 @@ export const UserBio = styled.textarea`
 
   padding: 8px;
   font-size: 16px;
+
+  @media (max-width: 600px) {
+    width: 500px;
+  }
+
+  @media (max-width: 480px) {
+    width: 400px;
+  }
 `;
 
 export const UsernameBio = styled.div`

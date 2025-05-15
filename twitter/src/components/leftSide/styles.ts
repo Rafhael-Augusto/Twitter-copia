@@ -5,24 +5,46 @@ export const Container = styled.div`
   color: white;
 
   background-color: transparent;
-
   height: 100%;
 `;
 
 export const Background = styled.div`
   height: 100px;
   width: 240px;
+
+  @media (max-width: 1200px) {
+    width: 0px;
+    margin-left: 64px;
+  }
+
+  @media (max-width: 992px) {
+    width: 0px;
+    margin-left: 120px;
+  }
+  @media (max-width: 768px) {
+    width: 0px;
+    margin-left: 100px;
+  }
+  @media (max-width: 600px) {
+    width: 0px;
+    margin-left: 30px;
+  }
 `;
 
 export const ButtonsList = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  align-items: center;
 
   position: relative;
 
   height: 760px;
   background-color: transparent;
+
+  @media (max-width: 1200px) {
+    height: 200px;
+  }
 `;
 
 export const LogoButton = styled.img`
@@ -34,6 +56,13 @@ export const LogoButton = styled.img`
   cursor: pointer;
 
   margin-left: 18px;
+
+  @media (max-width: 600px) {
+    margin-left: 80px;
+  }
+  @media (max-width: 480px) {
+    margin-left: 90px;
+  }
 `;
 
 export const ButtonInteraction = styled.div`
@@ -54,6 +83,10 @@ export const ButtonInteraction = styled.div`
   }
 
   cursor: pointer;
+
+  @media (max-width: 600px) {
+    left: 67px;
+  }
 `;
 
 export const Button = styled.button`
@@ -67,6 +100,10 @@ export const Button = styled.button`
 
   font-size: 24px;
   cursor: pointer;
+
+  @media (max-width: 1200px) {
+    display: none;
+  }
 `;
 
 export const ButtonImage = styled.img`
@@ -74,6 +111,16 @@ export const ButtonImage = styled.img`
   width: 32px;
 
   margin-left: 12px;
+
+  @media (max-width: 768px) {
+    margin-top: 16px;
+  }
+  @media (max-width: 600px) {
+    margin-left: 75px;
+  }
+  @media (max-width: 480px) {
+    margin-left: 85px;
+  }
 `;
 
 export const Wrapper = styled.div`
@@ -94,6 +141,17 @@ export const Wrapper = styled.div`
   }
 
   cursor: pointer;
+
+  @media (max-width: 1200px) {
+    &:hover {
+      width: 20px;
+
+      border-radius: 0;
+      transition: none;
+
+      background-color: rgba(255, 255, 255, 0);
+    }
+  }
 `;
 
 export const UserInfo = styled.div`
@@ -115,6 +173,20 @@ export const UserInfo = styled.div`
   }
 
   cursor: pointer;
+
+  @media (max-width: 1200px) {
+    width: 64px;
+    margin-right: 125px;
+  }
+  @media (max-width: 768px) {
+    margin-top: 27px;
+  }
+  @media (max-width: 600px) {
+    margin-left: 126px;
+  }
+  @media (max-width: 480px) {
+    margin-left: 145px;
+  }
 `;
 
 export const ProfilePicture = styled.img`
@@ -127,12 +199,20 @@ export const ProfilePicture = styled.img`
 export const Username = styled.h3`
   font-weight: bolder;
   font-size: 20px;
+
+  @media (max-width: 1200px) {
+    display: none;
+  }
 `;
 
 export const UserAt = styled.h2`
   font-weight: bold;
   font-size: 12px;
   color: rgba(255, 255, 255, 0.1);
+
+  @media (max-width: 1200px) {
+    display: none;
+  }
 `;
 
 export const OpenMenu = styled.span`
@@ -141,6 +221,10 @@ export const OpenMenu = styled.span`
 
   margin-left: 22px;
   margin-bottom: 8px;
+
+  @media (max-width: 1200px) {
+    display: none;
+  }
 `;
 
 export const SignOutMenu = styled.div`
@@ -162,6 +246,26 @@ export const SignOutMenu = styled.div`
 
   border: 1px solid rgba(255, 255, 255, 0.4);
   box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
+
+  @media (max-width: 1200px) {
+    left: -20px;
+    bottom: -50px;
+  }
+
+  @media (max-width: 768px) {
+    left: -86px;
+    bottom: -100px;
+  }
+  @media (max-width: 600px) {
+    left: -24px;
+    bottom: -100px;
+  }
+  @media (max-width: 480px) {
+    left: -15px;
+    bottom: -100px;
+  }
+
+  z-index: 9;
 `;
 
 export const SignOutButton = styled.button`
@@ -169,7 +273,7 @@ export const SignOutButton = styled.button`
   border: none;
 
   font-size: 16px;
-  z-index: 6;
+  z-index: 9;
 
   &:hover {
     text-decoration: underline;
@@ -180,11 +284,10 @@ export const SignOutButton = styled.button`
 
 export const CloseDiv = styled.div`
   position: absolute;
-
   top: 0;
   left: 0;
 
-  z-index: 4;
+  z-index: 8;
 
   height: 100vh;
   width: 100vw;

@@ -3,6 +3,14 @@ import styled from "styled-components";
 export const Container = styled.div`
   width: 200px;
   height: 100%;
+
+  @media (max-width: 1200px) {
+    width: 365px;
+  }
+
+  @media (max-width: 1000px) {
+    width: 0px;
+  }
 `;
 
 export const Wrapper = styled.div`
@@ -17,6 +25,23 @@ export const Wrapper = styled.div`
   background-color: transparent;
   border: 1px solid #303336;
   border-radius: 16px;
+
+  @media (max-width: 1200px) {
+    width: 280px;
+    margin-left: 45px;
+  }
+
+  @media (max-width: 992px) {
+    margin-left: 19px;
+  }
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+
+  @media (max-width: 1000px) {
+    display: none;
+  }
 `;
 
 export const Title = styled.h2`

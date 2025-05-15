@@ -12,8 +12,6 @@ export const Container = styled.div`
 
   height: 100%;
 
-  border-top: 1px solid #303336;
-
   cursor: pointer;
   transition: all 0.1s ease-in-out;
 
@@ -52,6 +50,26 @@ export const OpenOptions = styled.button`
   background-color: transparent;
 
   cursor: pointer;
+
+  @media (max-width: 1200px) {
+    margin-right: 100px;
+  }
+
+  @media (max-width: 1000px) {
+    margin-right: 100px;
+  }
+
+  @media (max-width: 900px) {
+    margin-right: 110px;
+  }
+
+  @media (max-width: 768px) {
+    margin-right: 64px;
+  }
+
+  @media (max-width: 600px) {
+    margin-right: 150px;
+  }
 `;
 
 export const ProfilePicture = styled.img`

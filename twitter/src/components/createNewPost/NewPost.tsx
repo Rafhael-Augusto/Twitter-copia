@@ -1,15 +1,33 @@
-import React, { useRef, useState, type ChangeEvent } from "react";
+import React, { useEffect, useRef, useState, type ChangeEvent } from "react";
 import axios from "axios";
 
 import API_BASE_URL from "../../config/api";
 
 import * as S from "./styles";
 
+type UserApi = {
+  username: string;
+  profile: string;
+  banner: string;
+  following: number;
+  followers: number;
+  user: number;
+  userat: string;
+  created_at: string;
+  bio: string;
+  following_ids: [];
+  followers_ids: [];
+  posts_made: number;
+  id: number;
+};
+
 function CreateNewPost() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [filePreview, setFilePreview] = useState<File | null>(null);
   const [textPreview, setTextPreview] = useState("");
+
+  const [userInfo, setUserInfo] = useState<UserApi>();
 
   const selectFile = () => {
     if (fileRef.current) {
@@ -47,6 +65,36 @@ function CreateNewPost() {
 
       setFilePreview(null);
       setTextPreview("");
+
+      updatePostsMade();
+    }
+  };
+
+  useEffect(() => {
+    const fetchUserInfo = () => {
+      axios.get(`${API_BASE_URL}/profiles/1/`).then((res) => {
+        setUserInfo(res.data);
+      });
+    };
+
+    fetchUserInfo();
+  }, []);
+
+  const updatePostsMade = () => {
+    if (userInfo) {
+      axios
+        .patch(`${API_BASE_URL}/profiles/${userInfo.user}/`, {
+          user: userInfo.user,
+          id: userInfo.id,
+          userat: userInfo.userat,
+          posts_made: Number(userInfo.posts_made) + 1,
+        })
+        .then((res) => {
+          console.log("Perfil atualizad", res);
+        })
+        .catch((res) => {
+          console.log("Erro na atualizacao do perfil", res);
+        });
     }
   };
 

@@ -24,6 +24,22 @@ export const FeedPosts = styled.ul`
   &::-webkit-scrollbar-track {
     background: transparent;
   }
+
+  @media (max-width: 1200px) {
+    width: 500px;
+  }
+  @media (max-width: 768px) {
+    width: 550px;
+    margin-left: 0px;
+  }
+  @media (max-width: 600px) {
+    width: 450px;
+    margin-left: 50px;
+  }
+  @media (max-width: 480px) {
+    width: 350px;
+    margin-left: 60px;
+  }
 `;
 
 export const ChangeFeed = styled.div`
@@ -34,10 +50,49 @@ export const ChangeFeed = styled.div`
 
   background-color: rgba(0, 0, 0, 0.8);
 
+  width: 600px;
+
   z-index: 4;
 
   & > button {
     width: 298px;
+  }
+
+  @media (max-width: 1200px) {
+    display: flex;
+    align-items: start;
+    justify-content: start;
+
+    & > button {
+      width: 41.5%;
+    }
+  }
+  @media (max-width: 768px) {
+    display: flex;
+    align-items: start;
+    justify-content: start;
+
+    & > button {
+      width: 45.65%;
+    }
+  }
+  @media (max-width: 600px) {
+    display: flex;
+    align-items: start;
+    justify-content: start;
+
+    & > button {
+      width: 37.45%;
+    }
+  }
+  @media (max-width: 480px) {
+    display: flex;
+    align-items: start;
+    justify-content: start;
+
+    & > button {
+      width: 29.1%;
+    }
   }
 `;
 
@@ -50,8 +105,6 @@ export const SelectedFeed = styled.button`
   font-weight: bolder;
   font-size: 18px;
   text-align: center;
-
-  width: 100%;
 
   transition: background-color 0.1s ease-in-out;
 

@@ -9,6 +9,7 @@ import API_BASE_URL from "../../config/api";
 import * as S from "./styles";
 import LeftSide from "../leftSide/LeftSide";
 import WhoToFollow from "../whoToFollow/WhoToFollow";
+import ReplyModel from "../reply/ReplyModel";
 
 type PostApi = {
   id: number;
@@ -39,6 +40,17 @@ type UserApi = {
   posts_made: number;
 };
 
+type ReplyApi = {
+  id: number;
+  text: string;
+  attachment: string;
+  likes: string;
+  post: number;
+  user: number;
+  userat: string;
+  username: string;
+};
+
 function UserProfile() {
   const navigate = useNavigate();
 
@@ -47,6 +59,8 @@ function UserProfile() {
 
   const [posts, setPosts] = useState<[PostApi]>();
   const [userInfo, setUserInfo] = useState<UserApi>();
+
+  const [userReplies, setUserReplies] = useState<[ReplyApi]>();
 
   const { userId } = useParams();
 
@@ -76,8 +90,17 @@ function UserProfile() {
       });
     };
 
+    const fetchReplies = () => {
+      axios.get(`${API_BASE_URL}/replies/`).then((res) => {
+        setUserReplies(res.data);
+
+        fetchPosts();
+      });
+    };
+
     setLoaded("false");
-    fetchPosts();
+    const interval = setInterval(() => fetchReplies(), 500);
+    return () => clearInterval(interval);
   }, [userId]);
 
   const returnHome = () => {
@@ -160,7 +183,7 @@ function UserProfile() {
                 onClick={() => setIsInPost(false)}
                 style={mediaStyle}
               >
-                Mídia
+                Comentarios
               </S.SelectButton>
             </S.SelectButtonDiv>
 
@@ -176,6 +199,18 @@ function UserProfile() {
                         key={post.id}
                       >
                         <Post post_info={post}></Post>
+                      </div>
+                    );
+                  }
+                })
+              : ""}
+
+            {!isInPost && userReplies
+              ? userReplies.map((reply) => {
+                  if (reply.user === Number(userId)) {
+                    return (
+                      <div key={reply.id}>
+                        <ReplyModel comment={reply}></ReplyModel>
                       </div>
                     );
                   }
