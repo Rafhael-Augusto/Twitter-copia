@@ -3,23 +3,9 @@ import axios from "axios";
 
 import API_BASE_URL from "../../config/api";
 
-import * as S from "./styles";
+import type { ProfileApiType } from "../../types";
 
-type UserApi = {
-  username: string;
-  profile: string;
-  banner: string;
-  following: number;
-  followers: number;
-  user: number;
-  userat: string;
-  created_at: string;
-  bio: string;
-  following_ids: [];
-  followers_ids: [];
-  posts_made: number;
-  id: number;
-};
+import * as S from "./styles";
 
 function CreateNewPost() {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -27,7 +13,7 @@ function CreateNewPost() {
   const [filePreview, setFilePreview] = useState<File | null>(null);
   const [textPreview, setTextPreview] = useState("");
 
-  const [userInfo, setUserInfo] = useState<UserApi>();
+  const [userInfo, setUserInfo] = useState<ProfileApiType>();
 
   const selectFile = () => {
     if (fileRef.current) {
@@ -55,14 +41,15 @@ function CreateNewPost() {
 
     if (textPreview || filePreview) {
       axios.post(`${API_BASE_URL}/posts/`, {
-        username: "Rafhael Augusto",
-        user_at: "Rafhael",
-        user: 1,
-        profile: 1,
+        username: userInfo?.username,
+        user_at: userInfo?.userat,
+        user: userInfo?.id,
+        profile: userInfo?.id,
         text: textPreview,
         attachments: filePreview,
       });
 
+      console.log(userInfo);
       setFilePreview(null);
       setTextPreview("");
 
@@ -72,7 +59,7 @@ function CreateNewPost() {
 
   useEffect(() => {
     const fetchUserInfo = () => {
-      axios.get(`${API_BASE_URL}/profiles/1/`).then((res) => {
+      axios.get(`${API_BASE_URL}/profiles/4/`).then((res) => {
         setUserInfo(res.data);
       });
     };
@@ -90,7 +77,7 @@ function CreateNewPost() {
           posts_made: Number(userInfo.posts_made) + 1,
         })
         .then((res) => {
-          console.log("Perfil atualizad", res);
+          console.log("Perfil atualizado", res);
         })
         .catch((res) => {
           console.log("Erro na atualizacao do perfil", res);

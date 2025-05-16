@@ -1,24 +1,15 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 import API_BASE_URL from "../../config/api";
+import type { ProfileApiType } from "../../types";
+
+import WhoToFollowItem from "../whoToFollowItem/whoToFollowItem";
 
 import * as S from "./styles";
 
-type ProfileApi = [
-  {
-    id: number;
-    username: string;
-    userat: string;
-    profile: File;
-  }
-];
-
 function WhoToFollow() {
-  const navigate = useNavigate();
-
-  const [profiles, setProfiles] = useState<ProfileApi | null>(null);
+  const [profiles, setProfiles] = useState<[ProfileApiType] | null>(null);
 
   useEffect(() => {
     const UpdateList = () => {
@@ -32,10 +23,6 @@ function WhoToFollow() {
     return () => clearInterval(interval);
   }, []);
 
-  const VisitProfile = (userat: string, id: number) => {
-    navigate(`/${userat}/${id}/profile`);
-  };
-
   return (
     <S.Container>
       <S.Wrapper>
@@ -45,18 +32,7 @@ function WhoToFollow() {
           <S.ProfileList>
             {profiles?.map((profile) => (
               <S.Profile key={profile.id}>
-                <S.ProfileInfos
-                  onClick={() => VisitProfile(profile.userat, profile.id)}
-                >
-                  <S.UserProfilePicture src="/Logo.jpg" />
-                  <div>
-                    <S.UserProfileUsername>
-                      {profile.username}
-                    </S.UserProfileUsername>
-                    <S.UserProfileAt>@{profile.userat}</S.UserProfileAt>
-                  </div>
-                </S.ProfileInfos>
-                <S.FollowButton>Seguir</S.FollowButton>
+                <WhoToFollowItem item={profile} />
               </S.Profile>
             ))}
           </S.ProfileList>

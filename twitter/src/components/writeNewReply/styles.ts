@@ -11,6 +11,19 @@ export const Container = styled.div`
   width: 25%;
 
   z-index: 8;
+
+  @media (max-width: 1000px) {
+    width: 35%;
+  }
+  @media (max-width: 768px) {
+    width: 40%;
+  }
+  @media (max-width: 600px) {
+    width: 50%;
+  }
+  @media (max-width: 480px) {
+    width: 60%;
+  }
 `;
 
 export const Wrapper = styled.div`

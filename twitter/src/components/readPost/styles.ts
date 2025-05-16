@@ -6,10 +6,6 @@ interface Props {
   leftpos?: number;
 }
 
-interface Loaded {
-  isloaded: string;
-}
-
 export const Wrapper = styled.li`
   display: flex;
   flex-direction: column;
@@ -425,10 +421,4 @@ export const EditedPost = styled.div`
 
     font-size: 12px;
   }
-`;
-
-export const LoadDiv = styled.div<Loaded>`
-  transition: all 0.5s ease-in-out;
-
-  opacity: ${(props) => (props.isloaded === "true" ? 1 : 0)};
 `;

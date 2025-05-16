@@ -1,108 +1,143 @@
 import { useNavigate } from "react-router-dom";
-
-import * as S from "./styles";
 import axios from "axios";
+
 import API_BASE_URL from "../../config/api";
 
+import type { PostApiType, ProfileApiType } from "../../types";
+
+import * as S from "./styles";
+import { useEffect, useState } from "react";
+import PageLoading from "../loadingPage/LoadingPage";
+
 type PostApi = {
-  post_info: {
-    id: number;
-    text: string;
-    attachment: string;
-    comments: number;
-    likes: number;
-    views: number;
-    created_at: number;
-    user: number;
-    username: string;
-    user_at: string;
-    post_edited: boolean;
-  };
+  item: PostApiType;
 };
 
-function Post({ post_info }: PostApi) {
+function Post({ item }: PostApi) {
   const navigate = useNavigate();
 
+  const [userInfo, setUserInfo] = useState<ProfileApiType>();
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const [userRes] = await Promise.all([
+          axios.get(`${API_BASE_URL}/profiles/1/`),
+        ]);
+
+        setUserInfo(userRes.data);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        console.log("Dados pegos");
+        setLoaded(true);
+      }
+    };
+
+    setLoaded(false);
+    fetchUserInfo();
+  }, []);
+
   const addViewToPost = () => {
-    axios
-      .patch(`${API_BASE_URL}/posts/${post_info.id}/`, {
-        views: post_info.views + 1,
-      })
-      .then((res) => {
-        console.log("Post atualizado", res.data);
-      })
-      .catch((res) => {
-        console.error("Erro na atualizacao do post", res);
+    if (userInfo && !userInfo.posts_visited.includes(item.id)) {
+      const updatedList = [...userInfo.posts_visited, item.id];
+
+      axios
+        .patch(`${API_BASE_URL}/posts/${item.id}/`, {
+          views: item.views + 1,
+        })
+        .then((res) => {
+          console.log("Post atualizado", res.data);
+        })
+        .catch((res) => {
+          console.error("Erro na atualizacao do post", res);
+        });
+
+      axios.patch(`${API_BASE_URL}/profiles/${userInfo.user}/`, {
+        posts_visited: updatedList,
       });
+    }
   };
 
   const OpenPost = () => {
-    navigate(`/${post_info.user_at}/status/${post_info.user}/${post_info.id}`);
+    navigate(`/${item.user_at}/status/${item.user}/${item.id}`);
 
     addViewToPost();
   };
 
   return (
     <>
-      <S.Container onClick={OpenPost}>
-        <S.ProfileInfo>
-          <S.ProfilePicture
-            src="https://i.pinimg.com/736x/d1/70/99/d17099bc26cf4cb9db8fbef0d6d6f8ca.jpg"
-            alt="Profile Picture"
-          />
-          <div style={{ position: "relative" }}>
-            <S.UserName>{post_info.username}</S.UserName>
-            <S.EditedPost
-              style={{ display: post_info.post_edited ? "block" : "none" }}
-            >
-              <span style={{ position: "absolute" }}>(editado)</span>
-            </S.EditedPost>
-            <S.OpenOptions>. . .</S.OpenOptions>
-          </div>
-        </S.ProfileInfo>
+      {loaded ? (
+        <S.Container onClick={OpenPost}>
+          <S.ProfileInfo>
+            <S.ProfilePicture
+              src="https://i.pinimg.com/736x/d1/70/99/d17099bc26cf4cb9db8fbef0d6d6f8ca.jpg"
+              alt="Profile Picture"
+            />
+            <div style={{ position: "relative" }}>
+              <S.UserName>{item.username}</S.UserName>
+              <S.EditedPost
+                style={{ display: item.post_edited ? "block" : "none" }}
+              >
+                <span style={{ position: "absolute" }}>(editado)</span>
+              </S.EditedPost>
+              <S.OpenOptions>. . .</S.OpenOptions>
+            </div>
+          </S.ProfileInfo>
 
-        <S.PostInfo>
-          <S.PostText>{post_info.text}</S.PostText>
-          <S.PostAttachment>
-            {post_info.attachment ? (
-              <img
-                style={{ marginTop: "4px" }}
-                loading="lazy"
-                src={post_info.attachment}
-                alt="Post Image"
-              />
-            ) : (
-              ""
-            )}
+          <S.PostInfo>
+            <S.PostText>{item.text}</S.PostText>
+            <S.PostAttachment>
+              {item.attachment ? (
+                <img
+                  style={{ marginTop: "4px" }}
+                  loading="lazy"
+                  src={item.attachment}
+                  alt="Post Image"
+                />
+              ) : (
+                ""
+              )}
 
-            <S.PostInteract>
-              <S.PostUserInteract hovercolor="29, 146, 227, 0.4">
-                <div style={{ position: "relative" }}>
-                  <img src="/message.svg" alt="Post Comments" />
-                </div>
-                <span>{post_info.comments}</span>
-              </S.PostUserInteract>
-              <S.PostUserInteract hovercolor="249, 54, 128, 0.4">
-                <div style={{ position: "relative" }}>
-                  <img src="/heart.svg" alt="Like Post" />
-                </div>
-                <span>{post_info.likes}</span>
-              </S.PostUserInteract>
-              <S.PostUserInteract hovercolor="0, 186, 124, 0.4">
-                <div style={{ position: "relative" }}>
-                  <img src="/eye.svg" alt="Post Views" />
-                </div>
-                <span>{post_info.views}</span>
-              </S.PostUserInteract>
-              <S.PostUserInteract>
-                <div style={{ position: "relative" }}>
-                  <img src="/bookmark.svg" alt="Save post" />
-                </div>
-              </S.PostUserInteract>
-            </S.PostInteract>
-          </S.PostAttachment>
-        </S.PostInfo>
-      </S.Container>
+              <S.PostInteract>
+                <S.PostUserInteract hovercolor="29, 146, 227, 0.4">
+                  <div style={{ position: "relative" }}>
+                    <img src="/message.svg" alt="Post Comments" />
+                  </div>
+                  <span>{item.comments}</span>
+                </S.PostUserInteract>
+                <S.PostUserInteract hovercolor="249, 54, 128, 0.4">
+                  <div style={{ position: "relative" }}>
+                    <img
+                      src={
+                        userInfo?.posts_liked.includes(item.id)
+                          ? "/fullHeart.png"
+                          : "/heart.svg"
+                      }
+                      alt="Like Post"
+                    />
+                  </div>
+                  <span>{item.likes}</span>
+                </S.PostUserInteract>
+                <S.PostUserInteract hovercolor="0, 186, 124, 0.4">
+                  <div style={{ position: "relative" }}>
+                    <img src="/eye.svg" alt="Post Views" />
+                  </div>
+                  <span>{item.views}</span>
+                </S.PostUserInteract>
+                <S.PostUserInteract>
+                  <div style={{ position: "relative" }}>
+                    <img src="/bookmark.svg" alt="Save post" />
+                  </div>
+                </S.PostUserInteract>
+              </S.PostInteract>
+            </S.PostAttachment>
+          </S.PostInfo>
+        </S.Container>
+      ) : (
+        <PageLoading />
+      )}
     </>
   );
 }

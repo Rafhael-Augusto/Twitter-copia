@@ -5,11 +5,7 @@ interface Props {
   hovercolor: string;
 }
 
-interface Loading {
-  isloaded: string;
-}
-
-export const Container = styled.div<Loading>`
+export const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -30,9 +26,7 @@ export const Container = styled.div<Loading>`
     background: transparent;
   }
 
-  transition: all 0.1s ease-in-out;
-
-  opacity: ${(props) => (props.isloaded === "true" ? 1 : 0)};
+  transition: all 0.5s ease-in;
   @media (max-width: 1000px) {
     margin-left: 0px;
   }

@@ -1,11 +1,16 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import axios from "axios";
+
+import API_BASE_URL from "../../config/api";
+import type { ProfileApiType } from "../../types";
 
 import * as S from "./styles";
 
 function LeftSide() {
   const navigate = useNavigate();
 
+  const [userInfo, setUserInfo] = useState<ProfileApiType>();
   const [openMenu, setOpenMenu] = useState(false);
 
   const ReturnHome = () => {
@@ -15,6 +20,12 @@ function LeftSide() {
   const GoToProfile = () => {
     navigate("/Rafhael/1/profile");
   };
+
+  useEffect(() => {
+    axios.get(`${API_BASE_URL}/profiles/1/`).then((res) => {
+      setUserInfo(res.data);
+    });
+  });
 
   return (
     <>
@@ -40,13 +51,15 @@ function LeftSide() {
               </S.Wrapper>
             </div>
             <S.SignOutMenu style={{ display: openMenu ? "flex" : "none" }}>
-              <S.SignOutButton>Sair da conta @Placeholder</S.SignOutButton>
+              <S.SignOutButton>
+                Sair da conta @{userInfo?.userat}
+              </S.SignOutButton>
             </S.SignOutMenu>
             <S.UserInfo onClick={() => setOpenMenu(!openMenu)}>
               <S.ProfilePicture src="/Logo.jpg" />
               <div>
-                <S.Username>Placeholder</S.Username>
-                <S.UserAt>@Placeholder</S.UserAt>
+                <S.Username>{userInfo?.username}</S.Username>
+                <S.UserAt>@{userInfo?.userat}</S.UserAt>
               </div>
               <S.OpenMenu>. . .</S.OpenMenu>
             </S.UserInfo>

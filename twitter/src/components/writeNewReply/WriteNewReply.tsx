@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 import API_BASE_URL from "../../config/api";
+import type { PostApiType, ProfileApiType } from "../../types";
 
 import * as S from "./styles";
 
@@ -11,30 +12,11 @@ type ReplyProp = {
   postId?: string;
 };
 
-type PostApi = {
-  id: number;
-  text: string;
-  attachment: string;
-  comments: number;
-  likes: number;
-  views: number;
-  created_at: number;
-  user: number;
-  username: string;
-  user_at: string;
-  post_edited: boolean;
-};
-
-type PublisherApi = {
-  username: string;
-  userat: string;
-};
-
 function NewReply({ openReplyMenu, setOpenReplyMenu, postId }: ReplyProp) {
   const [replyMessage, setReplyMessage] = useState("");
 
-  const [postInfo, setPostInfo] = useState<PostApi>();
-  const [publisherInfo, setPublisherInfo] = useState<PublisherApi>();
+  const [postInfo, setPostInfo] = useState<PostApiType>();
+  const [publisherInfo, setPublisherInfo] = useState<ProfileApiType>();
 
   const SubmitReply = () => {
     if (replyMessage) {
@@ -79,7 +61,7 @@ function NewReply({ openReplyMenu, setOpenReplyMenu, postId }: ReplyProp) {
         setPublisherInfo(res.data);
       });
     }
-  }, [postId, postInfo?.user]);
+  }, [postId, postInfo, postInfo?.user]);
 
   return (
     <div>

@@ -16,6 +16,7 @@ class Profile(models.Model):
     posts_liked = ArrayField(models.IntegerField(), blank=True, default=list)
     posts_favourited = ArrayField(models.IntegerField(), blank=True, default=list)
     posts_visited = ArrayField(models.IntegerField(), blank=True, default=list)
+    replies_liked = ArrayField(models.IntegerField(), blank=True, default=list)
     posts_made = IntegerField(default=0)
     bio = TextField(null=True, blank=True, max_length=120)
 

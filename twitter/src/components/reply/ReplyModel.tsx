@@ -1,19 +1,11 @@
 import { useNavigate } from "react-router-dom";
+
+import type { ReplyApiType } from "../../types";
+
 import * as S from "./styles";
-import axios from "axios";
-import API_BASE_URL from "../../config/api";
 
 type Comment = {
-  comment: {
-    id: number;
-    text: string;
-    attachment: string;
-    likes: string;
-    post: number;
-    user: number;
-    userat: string;
-    username: string;
-  };
+  comment: ReplyApiType;
 };
 
 function ReplyModel({ comment }: Comment) {
@@ -21,20 +13,6 @@ function ReplyModel({ comment }: Comment) {
 
   const visitProfile = () => {
     navigate(`/${comment.userat}/${comment.user}/profile`);
-  };
-
-  const likeComment = () => {
-    axios
-
-      .patch(`${API_BASE_URL}/replies/${comment.id}/`, {
-        likes: comment.likes + 1,
-      })
-      .then((res) => {
-        console.log("Post atualizado", res.data);
-      })
-      .catch((res) => {
-        console.error("Erro na atualizacao do post", res);
-      });
   };
 
   return (
@@ -65,16 +43,7 @@ function ReplyModel({ comment }: Comment) {
           <S.PostInteract
             style={{ marginTop: comment.attachment ? "10px" : "0px" }}
           >
-            <S.PostUserInteract hovercolor="249, 54, 128, 0.4">
-              <div onClick={likeComment} style={{ position: "relative" }}>
-                <img src="/heart.svg" alt="Like Post" />
-                <S.UserInteractHover
-                  toppos={70}
-                  hovercolor="249, 54, 128, 0.4"
-                />
-              </div>
-              <span>{comment.likes}</span>
-            </S.PostUserInteract>
+            <S.PostUserInteract hovercolor="249, 54, 128, 0.4"></S.PostUserInteract>
           </S.PostInteract>
         </S.PostAttachment>
       </S.PostInfo>

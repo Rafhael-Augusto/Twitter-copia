@@ -111,7 +111,6 @@ export const ButtonImage = styled.img`
   width: 32px;
 
   margin-left: 12px;
-
   @media (max-width: 768px) {
     margin-top: 16px;
   }
@@ -159,7 +158,7 @@ export const UserInfo = styled.div`
   align-items: center;
   gap: 8px;
 
-  width: 235px;
+  width: 320px;
   padding: 6px;
 
   border-radius: 32px;

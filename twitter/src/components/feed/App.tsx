@@ -4,34 +4,35 @@ import axios from "axios";
 import CreateNewPost from "../createNewPost/NewPost";
 import Post from "../newPost/Post";
 import WhoToFollow from "../whoToFollow/WhoToFollow";
-import API_BASE_URL from "../../config/api";
-
-import * as S from "./styles";
 import LeftSide from "../leftSide/LeftSide";
 
-type PostApi = {
-  id: number;
-  text: string;
-  attachment: string;
-  comments: number;
-  likes: number;
-  views: number;
-  created_at: number;
-  user: number;
-  username: string;
-  user_at: string;
-  post_edited: boolean;
-};
+import API_BASE_URL from "../../config/api";
+
+import type { PostApiType, ProfileApiType } from "../../types";
+
+import * as S from "./styles";
 
 function App() {
   const [isForYou, setIsForYou] = useState(true);
-  const [posts, setPosts] = useState<[PostApi] | []>([]);
+  const [posts, setPosts] = useState<[PostApiType] | []>([]);
+
+  const [userInfo, setUserInfo] = useState<ProfileApiType>();
 
   useEffect(() => {
-    const fetchPosts = () => {
-      axios.get(`${API_BASE_URL}/posts/`).then((res) => {
-        setPosts(res.data);
-      });
+    const fetchPosts = async () => {
+      try {
+        const [userRes, postsRes] = await Promise.all([
+          axios.get(`${API_BASE_URL}/profiles/1/`),
+          axios.get(`${API_BASE_URL}/posts/`),
+        ]);
+
+        setUserInfo(userRes.data);
+        setPosts(postsRes.data);
+      } catch (err) {
+        console.log("Erro ao pegar informacoes", err);
+      } finally {
+        console.log("Informacoes pegas com sucesso :D");
+      }
     };
 
     fetchPosts();
@@ -70,10 +71,17 @@ function App() {
         {isForYou && posts
           ? posts.map((item) => (
               <li key={item.id}>
-                <Post post_info={item} />
+                <Post item={item} />
               </li>
             ))
-          : ""}
+          : posts.map((item) => {
+              if (userInfo?.following_ids.includes(item.user))
+                return (
+                  <li key={item.id}>
+                    <Post item={item} />
+                  </li>
+                );
+            })}
       </S.FeedPosts>
       <WhoToFollow />
     </S.Container>

@@ -4,24 +4,14 @@ import axios from "axios";
 
 import API_BASE_URL from "../../config/api";
 
+import type { ProfileApiType } from "../../types";
+
 import * as S from "./styles";
 import { useParams } from "react-router-dom";
 
 type Prop = {
   isEditOpen: boolean;
   setIsEditOpen: React.Dispatch<React.SetStateAction<boolean>>;
-};
-
-type UserApi = {
-  username: string;
-  profile: string;
-  banner: string;
-  following: number;
-  followers: number;
-  user: number;
-  userat: string;
-  created_at: string;
-  bio: string;
 };
 
 function EditProfile({ isEditOpen, setIsEditOpen }: Prop) {
@@ -34,7 +24,7 @@ function EditProfile({ isEditOpen, setIsEditOpen }: Prop) {
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
 
-  const [userInfo, setUserInfo] = useState<UserApi>();
+  const [userInfo, setUserInfo] = useState<ProfileApiType>();
 
   const { userId } = useParams();
 

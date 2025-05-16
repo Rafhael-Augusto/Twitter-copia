@@ -2,54 +2,17 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-import Post from "../newPost/Post";
-import EditProfile from "../editProfile/EditProfile";
-import API_BASE_URL from "../../config/api";
-
-import * as S from "./styles";
 import LeftSide from "../leftSide/LeftSide";
 import WhoToFollow from "../whoToFollow/WhoToFollow";
 import ReplyModel from "../reply/ReplyModel";
+import Post from "../newPost/Post";
+import EditProfile from "../editProfile/EditProfile";
 
-type PostApi = {
-  id: number;
-  text: string;
-  attachment: string;
-  comments: number;
-  likes: number;
-  views: number;
-  created_at: number;
-  user: number;
-  username: string;
-  user_at: string;
-  post_edited: boolean;
-};
+import API_BASE_URL from "../../config/api";
+import type { PostApiType, ProfileApiType, ReplyApiType } from "../../types";
 
-type UserApi = {
-  username: string;
-  profile: string;
-  banner: string;
-  following: number;
-  followers: number;
-  user: number;
-  userat: string;
-  created_at: string;
-  bio: string;
-  following_ids: [];
-  followers_ids: [];
-  posts_made: number;
-};
-
-type ReplyApi = {
-  id: number;
-  text: string;
-  attachment: string;
-  likes: string;
-  post: number;
-  user: number;
-  userat: string;
-  username: string;
-};
+import * as S from "./styles";
+import PageLoading from "../loadingPage/LoadingPage";
 
 function UserProfile() {
   const navigate = useNavigate();
@@ -57,51 +20,84 @@ function UserProfile() {
   const [isInPost, setIsInPost] = useState(true);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
-  const [posts, setPosts] = useState<[PostApi]>();
-  const [userInfo, setUserInfo] = useState<UserApi>();
+  const [posts, setPosts] = useState<[PostApiType]>();
+  const [userProfile, setUserProfile] = useState<ProfileApiType>();
 
-  const [userReplies, setUserReplies] = useState<[ReplyApi]>();
+  const [userInfo, setUserInfo] = useState<ProfileApiType>();
+
+  const [loading, setLoading] = useState(true);
+
+  const [userReplies, setUserReplies] = useState<[ReplyApiType]>();
 
   const { userId } = useParams();
 
-  const [loaded, setLoaded] = useState("false");
-
   useEffect(() => {
-    const pageLoaded = () => {
-      setLoaded("true");
+    const fetchData = async () => {
+      try {
+        const [userRes, postsRes, repliesRes, userProfileRes] =
+          await Promise.all([
+            axios.get(`${API_BASE_URL}/profiles/6/`),
+            axios.get(`${API_BASE_URL}/posts/`),
+            axios.get(`${API_BASE_URL}/replies/`),
+            axios.get(`${API_BASE_URL}/profiles/${userId}/`),
+          ]);
+
+        setUserInfo(userRes.data);
+        setPosts(postsRes.data);
+        setUserReplies(repliesRes.data);
+        setUserProfile(userProfileRes.data);
+      } catch (err) {
+        console.log("Erro ao carregar perfil", err);
+      } finally {
+        console.log("carregado");
+        setLoading(false);
+      }
     };
 
-    const interval = setInterval(pageLoaded, 500);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const fetchUserInfo = () => {
-      axios.get(`${API_BASE_URL}/profiles/${userId}`).then((res) => {
-        setUserInfo(res.data);
-      });
-    };
-
-    const fetchPosts = () => {
-      axios.get(`${API_BASE_URL}/posts/`).then((res) => {
-        setPosts(res.data);
-
-        fetchUserInfo();
-      });
-    };
-
-    const fetchReplies = () => {
-      axios.get(`${API_BASE_URL}/replies/`).then((res) => {
-        setUserReplies(res.data);
-
-        fetchPosts();
-      });
-    };
-
-    setLoaded("false");
-    const interval = setInterval(() => fetchReplies(), 500);
-    return () => clearInterval(interval);
+    setLoading(true);
+    fetchData();
   }, [userId]);
+
+  const followUser = async () => {
+    if (!userInfo) return;
+
+    const isFollowing = userInfo.following_ids.includes(Number(userId));
+    const updatedList = isFollowing
+      ? userInfo.following_ids.filter((user) => user !== Number(userId))
+      : [...userInfo.following_ids, Number(userId)];
+
+    try {
+      await axios.patch(`${API_BASE_URL}/profiles/${userInfo.id}/`, {
+        following_ids: updatedList,
+      });
+
+      const res = await axios.get(`${API_BASE_URL}/profiles/${userInfo.id}/`);
+      setUserInfo(res.data);
+    } catch (err) {
+      console.error("Erro ao seguir/deixar de seguir", err);
+    }
+  };
+
+  const handleClick = () => {
+    if (userInfo?.id === Number(userId)) {
+      setIsEditOpen(true);
+    } else {
+      followUser();
+    }
+  };
+
+  const changeButtonText = () => {
+    if (userInfo?.id === Number(userId)) {
+      return "Editar perfil";
+    } else if (
+      userInfo?.id !== Number(userId) &&
+      !userInfo?.following_ids.includes(Number(userId))
+    ) {
+      return "Seguir perfil";
+    } else if (userInfo?.following_ids.includes(Number(userId))) {
+      return "Seguindo perfil";
+    }
+  };
 
   const returnHome = () => {
     navigate("/home");
@@ -118,109 +114,127 @@ function UserProfile() {
   return (
     <S.Background>
       <LeftSide />
-      <S.Container isloaded={loaded}>
-        <S.ContainerDiv>
-          <S.Header>
-            <div>
-              <S.ReturnArrow onClick={returnHome}>
-                <img src="/arrow-left.svg" alt="Return Arrow" />
-                <S.UserInteractHover
-                  toppos={60}
-                  hovercolor="255, 255, 255, 0.3"
-                />
-              </S.ReturnArrow>
-              <S.UserInfos>
-                <S.Username>{userInfo?.username}</S.Username>
-                <S.PostCounter>{userInfo?.posts_made} posts</S.PostCounter>
-              </S.UserInfos>
-            </div>
-          </S.Header>
-          <S.Wrapper>
-            <S.ProfileBanner>
-              <div>
-                <img src="/dog.jpeg" alt="Profile Banner" />
-              </div>
-              <S.EditProfileButton onClick={() => setIsEditOpen(true)}>
-                Editar perfil
-              </S.EditProfileButton>
-            </S.ProfileBanner>
-            <S.ProfilePicture>
-              <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjUSXHcFx8iQmHoULViI9o7QzLJlH95nEfIA&s"
-                alt="Profile Picture"
-              />
-            </S.ProfilePicture>
+      {loading ? (
+        <PageLoading />
+      ) : (
+        <>
+          {" "}
+          <S.Container>
+            <S.ContainerDiv>
+              <S.Header>
+                <div>
+                  <S.ReturnArrow onClick={returnHome}>
+                    <img src="/arrow-left.svg" alt="Return Arrow" />
+                    <S.UserInteractHover
+                      toppos={60}
+                      hovercolor="255, 255, 255, 0.3"
+                    />
+                  </S.ReturnArrow>
+                  <S.UserInfos>
+                    <S.Username>{userProfile?.username}</S.Username>
+                    <S.PostCounter>
+                      {userProfile?.posts_made} posts
+                    </S.PostCounter>
+                  </S.UserInfos>
+                </div>
+              </S.Header>
+              <S.Wrapper>
+                <S.ProfileBanner>
+                  <div>
+                    <img src="/dog.jpeg" alt="Profile Banner" />
+                  </div>
+                  <S.EditProfileButton onClick={() => handleClick()}>
+                    {changeButtonText()}
+                  </S.EditProfileButton>
+                </S.ProfileBanner>
+                <S.ProfilePicture>
+                  <img
+                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjUSXHcFx8iQmHoULViI9o7QzLJlH95nEfIA&s"
+                    alt="Profile Picture"
+                  />
+                </S.ProfilePicture>
 
-            <S.ProfileInfos>
-              <S.Username>{userInfo?.username}</S.Username>
-              <S.ProfileAt>@{userInfo?.userat}</S.ProfileAt>
-              <S.Bio style={{ display: userInfo?.bio ? "flex" : "none" }}>
-                <span>{userInfo?.bio}</span>
-              </S.Bio>
-              <S.DateInfo style={{ marginTop: !userInfo?.bio ? "8px" : "0" }}>
-                <S.CalendarIcon src="/calendar.svg" />
-                <S.DateJoined>{userInfo?.created_at}</S.DateJoined>
-              </S.DateInfo>
+                <S.ProfileInfos>
+                  <S.Username>{userProfile?.username}</S.Username>
+                  <S.ProfileAt>@{userProfile?.userat}</S.ProfileAt>
+                  <S.Bio
+                    style={{ display: userProfile?.bio ? "flex" : "none" }}
+                  >
+                    <span>{userProfile?.bio}</span>
+                  </S.Bio>
+                  <S.DateInfo
+                    style={{ marginTop: !userProfile?.bio ? "8px" : "0" }}
+                  >
+                    <S.CalendarIcon src="/calendar.svg" />
+                    <S.DateJoined>{userProfile?.created_at}</S.DateJoined>
+                  </S.DateInfo>
 
-              <S.DateInfo>
-                <S.Follow>
-                  <strong>{userInfo?.following_ids.length}</strong> Seguindo
-                </S.Follow>
-                <S.Follow>
-                  <strong>{userInfo?.followers_ids.length}</strong> Seguidores
-                </S.Follow>
-              </S.DateInfo>
-            </S.ProfileInfos>
+                  <S.DateInfo>
+                    <S.Follow>
+                      <strong>{userProfile?.following_ids.length}</strong>{" "}
+                      Seguindo
+                    </S.Follow>
+                    <S.Follow>
+                      <strong>{userProfile?.followers_ids.length}</strong>{" "}
+                      Seguidores
+                    </S.Follow>
+                  </S.DateInfo>
+                </S.ProfileInfos>
 
-            <S.SelectButtonDiv>
-              <S.SelectButton
-                onClick={() => setIsInPost(true)}
-                style={postsStyle}
-              >
-                Posts
-              </S.SelectButton>
-              <S.SelectButton
-                onClick={() => setIsInPost(false)}
-                style={mediaStyle}
-              >
-                Comentarios
-              </S.SelectButton>
-            </S.SelectButtonDiv>
+                <S.SelectButtonDiv>
+                  <S.SelectButton
+                    onClick={() => setIsInPost(true)}
+                    style={postsStyle}
+                  >
+                    Posts
+                  </S.SelectButton>
+                  <S.SelectButton
+                    onClick={() => setIsInPost(false)}
+                    style={mediaStyle}
+                  >
+                    Comentarios
+                  </S.SelectButton>
+                </S.SelectButtonDiv>
 
-            {isInPost && posts
-              ? posts.map((post) => {
-                  if (post.user === Number(userId)) {
-                    return (
-                      <div
-                        style={{
-                          border: "2px solid #303336",
-                          borderTop: "none",
-                        }}
-                        key={post.id}
-                      >
-                        <Post post_info={post}></Post>
-                      </div>
-                    );
-                  }
-                })
-              : ""}
+                {isInPost && posts
+                  ? posts.map((post) => {
+                      if (post.user === Number(userId)) {
+                        return (
+                          <div
+                            style={{
+                              border: "2px solid #303336",
+                              borderTop: "none",
+                            }}
+                            key={post.id}
+                          >
+                            <Post item={post}></Post>
+                          </div>
+                        );
+                      }
+                    })
+                  : ""}
 
-            {!isInPost && userReplies
-              ? userReplies.map((reply) => {
-                  if (reply.user === Number(userId)) {
-                    return (
-                      <div key={reply.id}>
-                        <ReplyModel comment={reply}></ReplyModel>
-                      </div>
-                    );
-                  }
-                })
-              : ""}
-          </S.Wrapper>
-        </S.ContainerDiv>
+                {!isInPost && userReplies
+                  ? userReplies.map((reply) => {
+                      if (reply.user === Number(userId)) {
+                        return (
+                          <div key={reply.id}>
+                            <ReplyModel comment={reply}></ReplyModel>
+                          </div>
+                        );
+                      }
+                    })
+                  : ""}
+              </S.Wrapper>
+            </S.ContainerDiv>
 
-        <EditProfile isEditOpen={isEditOpen} setIsEditOpen={setIsEditOpen} />
-      </S.Container>
+            <EditProfile
+              isEditOpen={isEditOpen}
+              setIsEditOpen={setIsEditOpen}
+            />
+          </S.Container>
+        </>
+      )}
       <WhoToFollow />
     </S.Background>
   );

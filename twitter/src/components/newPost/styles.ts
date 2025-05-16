@@ -7,6 +7,7 @@ interface Props {
 
 export const Container = styled.div`
   display: block;
+  position: relative;
   width: 598px;
   padding: 20px;
 
@@ -162,7 +163,7 @@ export const EditedPost = styled.div`
     color: rgba(255, 255, 255, 0.3);
 
     top: 7.5px;
-    left: 150px;
+    left: 40%;
 
     font-size: 12px;
   }
