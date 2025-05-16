@@ -21,21 +21,31 @@ function WhoToFollowItem({ item }: ApiType) {
     const fetchInfos = async () => {
       try {
         const [userRes, userToFollowRes] = await Promise.all([
-          axios.get(`${API_BASE_URL}/profiles/4/`),
-          axios.get(`${API_BASE_URL}/profiles/${item.id}`),
+          axios.get(
+            `${API_BASE_URL}/profiles/${localStorage.getItem("userId")}/`,
+            {
+              headers: {
+                Authorization: `Token ${localStorage.getItem("token")}`,
+              },
+            }
+          ),
+          axios.get(`${API_BASE_URL}/profiles/${item.id}`, {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }),
         ]);
 
         setUserInfo(userRes.data);
         setUserToFollow(userToFollowRes.data);
       } catch (err) {
         console.log(err);
-      } finally {
-        console.log("deu bom carai");
       }
     };
 
-    fetchInfos();
-  }, [item.id]);
+    const interval = setInterval(() => fetchInfos(), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const VisitProfile = (userat: string, id: number) => {
     navigate(`/${userat}/${id}/profile`);
@@ -52,15 +62,35 @@ function WhoToFollowItem({ item }: ApiType) {
         const updatedList = [...userInfo.following_ids, userToFollow.id];
         const updatedFollowers = [...item.followers_ids, userInfo.id];
 
-        await axios.patch(`${API_BASE_URL}/profiles/${userInfo.id}/`, {
-          following_ids: updatedList,
-        });
-        await axios.patch(`${API_BASE_URL}/profiles/${item.id}/`, {
-          followers_ids: updatedFollowers,
-        });
+        await axios.patch(
+          `${API_BASE_URL}/profiles/${userInfo.id}/`,
+          {
+            following_ids: updatedList,
+          },
+          {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        await axios.patch(
+          `${API_BASE_URL}/profiles/${item.id}/`,
+          {
+            followers_ids: updatedFollowers,
+          },
+          {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }
+        );
 
         await axios
-          .get(`${API_BASE_URL}/profiles/${userInfo.id}`)
+          .get(`${API_BASE_URL}/profiles/${userInfo.id}`, {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          })
           .then((res) => {
             setUserInfo(res.data);
           });

@@ -22,8 +22,19 @@ function App() {
     const fetchPosts = async () => {
       try {
         const [userRes, postsRes] = await Promise.all([
-          axios.get(`${API_BASE_URL}/profiles/1/`),
-          axios.get(`${API_BASE_URL}/posts/`),
+          axios.get(
+            `${API_BASE_URL}/profiles/${localStorage.getItem("userId")}/`,
+            {
+              headers: {
+                Authorization: `Token ${localStorage.getItem("token")}`,
+              },
+            }
+          ),
+          axios.get(`${API_BASE_URL}/posts/`, {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }),
         ]);
 
         setUserInfo(userRes.data);

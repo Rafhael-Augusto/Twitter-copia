@@ -66,10 +66,18 @@ function EditProfile({ isEditOpen, setIsEditOpen }: Prop) {
         setUsername(userInfo.username);
 
         axios
-          .patch(`${API_BASE_URL}/profiles/${userId}/`, {
-            username: username ? username : userInfo.username,
-            bio: bio,
-          })
+          .patch(
+            `${API_BASE_URL}/profiles/${userId}/`,
+            {
+              username: username ? username : userInfo.username,
+              bio: bio,
+            },
+            {
+              headers: {
+                Authorization: `Token ${localStorage.getItem("token")}`,
+              },
+            }
+          )
           .then((res) => {
             console.log("dados atualizados", res.data);
           })
@@ -77,7 +85,7 @@ function EditProfile({ isEditOpen, setIsEditOpen }: Prop) {
             console.error("Erro na atualizacao de dados", res);
           });
 
-        window.location.reload();
+        setTimeout(() => window.location.reload(), 2000);
       }
     };
 
@@ -86,11 +94,17 @@ function EditProfile({ isEditOpen, setIsEditOpen }: Prop) {
 
   useEffect(() => {
     const fetchUserInfo = () => {
-      axios.get(`${API_BASE_URL}/profiles/${userId}`).then((res) => {
-        setUserInfo(res.data);
+      axios
+        .get(`${API_BASE_URL}/profiles/${userId}`, {
+          headers: {
+            Authorization: `Token ${localStorage.getItem("token")}`,
+          },
+        })
+        .then((res) => {
+          setUserInfo(res.data);
 
-        setBio(res.data.bio);
-      });
+          setBio(res.data.bio);
+        });
     };
 
     fetchUserInfo();

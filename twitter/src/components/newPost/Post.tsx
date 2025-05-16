@@ -23,12 +23,19 @@ function Post({ item }: PostApi) {
     const fetchUserInfo = async () => {
       try {
         const [userRes] = await Promise.all([
-          axios.get(`${API_BASE_URL}/profiles/1/`),
+          axios.get(
+            `${API_BASE_URL}/profiles/${localStorage.getItem("userId")}/`,
+            {
+              headers: {
+                Authorization: `Token ${localStorage.getItem("token")}`,
+              },
+            }
+          ),
         ]);
 
         setUserInfo(userRes.data);
       } catch (err) {
-        console.log(err);
+        console.log("erroAAAAAAAAA", err);
       } finally {
         console.log("Dados pegos");
         setLoaded(true);
@@ -44,9 +51,17 @@ function Post({ item }: PostApi) {
       const updatedList = [...userInfo.posts_visited, item.id];
 
       axios
-        .patch(`${API_BASE_URL}/posts/${item.id}/`, {
-          views: item.views + 1,
-        })
+        .patch(
+          `${API_BASE_URL}/posts/${item.id}/`,
+          {
+            views: item.views + 1,
+          },
+          {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }
+        )
         .then((res) => {
           console.log("Post atualizado", res.data);
         })
@@ -54,9 +69,17 @@ function Post({ item }: PostApi) {
           console.error("Erro na atualizacao do post", res);
         });
 
-      axios.patch(`${API_BASE_URL}/profiles/${userInfo.user}/`, {
-        posts_visited: updatedList,
-      });
+      axios.patch(
+        `${API_BASE_URL}/profiles/${userInfo.id}/`,
+        {
+          posts_visited: updatedList,
+        },
+        {
+          headers: {
+            Authorization: `Token ${localStorage.getItem("token")}`,
+          },
+        }
+      );
     }
   };
 

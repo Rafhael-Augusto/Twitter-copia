@@ -39,7 +39,4 @@ class Reply(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     text = models.TextField()
-    attachment = models.URLField(blank=True, null=True)
-    likes = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-    reply_edited = models.BooleanField(default=False)

@@ -18,10 +18,6 @@ export type ReplyApiType = {
   username: string;
   userat: string;
   text: string;
-  attachment: string;
-  likes: number;
-  created_at: string;
-  reply_edited: boolean;
   user: number;
   profile: number;
   post: number;

@@ -20,6 +20,7 @@ function ReadPost() {
   const [date, setDate] = useState("");
 
   const [openMenu, setOpenMenu] = useState(false);
+  const [canLike, setCanLike] = useState(true);
 
   const [isEditing, setIsEditing] = useState(false);
   const [newEditMessage, setNewEditedMessage] = useState("");
@@ -28,7 +29,7 @@ function ReadPost() {
 
   const [userInfo, setUserInfo] = useState<ProfileApiType>();
 
-  const { postId } = useParams();
+  const { postId, userId } = useParams();
 
   const returnHome = () => {
     navigate("/home");
@@ -42,9 +43,24 @@ function ReadPost() {
     const fetchInfo = async () => {
       try {
         const [userRes, postRes, repliesRes] = await Promise.all([
-          axios.get(`${API_BASE_URL}/profiles/1/`),
-          axios.get(`${API_BASE_URL}/posts/${postId}/`),
-          axios.get(`${API_BASE_URL}/replies/`),
+          axios.get(
+            `${API_BASE_URL}/profiles/${localStorage.getItem("userId")}/`,
+            {
+              headers: {
+                Authorization: `Token ${localStorage.getItem("token")}`,
+              },
+            }
+          ),
+          axios.get(`${API_BASE_URL}/posts/${postId}/`, {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }),
+          axios.get(`${API_BASE_URL}/replies/`, {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }),
         ]);
 
         setUserInfo(userRes.data);
@@ -64,28 +80,43 @@ function ReadPost() {
     fetchInfo();
     const interval = setInterval(fetchInfo, 500);
     return () => clearInterval(interval);
-  }, []);
+  }, [postId, postInfo]);
 
   useEffect(() => {
     const fetchPostInfo = () => {
-      axios.get(`${API_BASE_URL}/posts/${postId}/`).then((res) => {
-        setNewEditedMessage(res.data.text);
-      });
+      axios
+        .get(`${API_BASE_URL}/posts/${postId}/`, {
+          headers: {
+            Authorization: `Token ${localStorage.getItem("token")}`,
+          },
+        })
+        .then((res) => {
+          setNewEditedMessage(res.data.text);
+        });
     };
 
     fetchPostInfo();
-  }, []);
+  }, [postId]);
 
   const likePost = () => {
-    if (postInfo) {
+    if (postInfo && canLike) {
+      setCanLike(false);
       const updatePost = () => {
         if (userInfo && !userInfo.posts_liked.includes(postInfo.id)) {
           const updatedList = [...userInfo.posts_liked, postInfo.id];
 
           axios
-            .patch(`${API_BASE_URL}/posts/${postId}/`, {
-              likes: postInfo.likes + 1,
-            })
+            .patch(
+              `${API_BASE_URL}/posts/${postId}/`,
+              {
+                likes: postInfo.likes + 1,
+              },
+              {
+                headers: {
+                  Authorization: `Token ${localStorage.getItem("token")}`,
+                },
+              }
+            )
             .then((res) => {
               console.log("Post atualizado", res.data);
             })
@@ -93,25 +124,57 @@ function ReadPost() {
               console.error("Erro na atualizacao do post", res);
             });
 
-          axios.get(`${API_BASE_URL}/posts/${postId}/`).then((res) => {
-            setPostInfo(res.data);
-          });
+          axios
+            .get(`${API_BASE_URL}/posts/${postId}/`, {
+              headers: {
+                Authorization: `Token ${localStorage.getItem("token")}`,
+              },
+            })
+            .then((res) => {
+              setPostInfo(res.data);
+            });
 
-          axios.patch(`${API_BASE_URL}/profiles/${userInfo.id}/`, {
-            posts_liked: updatedList,
-          });
+          axios.patch(
+            `${API_BASE_URL}/profiles/${userInfo.id}/`,
+            {
+              posts_liked: updatedList,
+            },
+            {
+              headers: {
+                Authorization: `Token ${localStorage.getItem("token")}`,
+              },
+            }
+          );
         } else if (userInfo && userInfo.posts_liked.includes(postInfo.id)) {
           const updatedList = [
             ...userInfo.posts_liked.filter((item) => item !== postInfo.id),
           ];
-          axios.patch(`${API_BASE_URL}/posts/${postId}/`, {
-            likes: postInfo.likes - 1,
-          });
+          axios.patch(
+            `${API_BASE_URL}/posts/${postId}/`,
+            {
+              likes: postInfo.likes - 1,
+            },
+            {
+              headers: {
+                Authorization: `Token ${localStorage.getItem("token")}`,
+              },
+            }
+          );
 
-          axios.patch(`${API_BASE_URL}/profiles/${userInfo.id}/`, {
-            posts_liked: updatedList,
-          });
+          axios.patch(
+            `${API_BASE_URL}/profiles/${userInfo.id}/`,
+            {
+              posts_liked: updatedList,
+            },
+            {
+              headers: {
+                Authorization: `Token ${localStorage.getItem("token")}`,
+              },
+            }
+          );
         }
+
+        setTimeout(() => setCanLike(true), 1000);
       };
       updatePost();
     }
@@ -129,10 +192,18 @@ function ReadPost() {
   const updatePost = () => {
     if (newEditMessage) {
       axios
-        .patch(`${API_BASE_URL}/posts/${postId}/`, {
-          text: newEditMessage,
-          post_edited: true,
-        })
+        .patch(
+          `${API_BASE_URL}/posts/${postId}/`,
+          {
+            text: newEditMessage,
+            post_edited: true,
+          },
+          {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }
+        )
         .then((res) => {
           console.log("Post atualizado", res.data);
 
@@ -147,7 +218,11 @@ function ReadPost() {
 
   const deletePost = () => {
     axios
-      .delete(`${API_BASE_URL}/posts/${postId}/`, {})
+      .delete(`${API_BASE_URL}/posts/${postId}/`, {
+        headers: {
+          Authorization: `Token ${localStorage.getItem("token")}`,
+        },
+      })
       .then((res) => {
         console.log("Post deletado", res.data);
 
@@ -174,6 +249,7 @@ function ReadPost() {
       {openReplyMenu && (
         <NewReply
           postId={postId}
+          userId={userId}
           openReplyMenu={openReplyMenu}
           setOpenReplyMenu={setOpenReplyMenu}
         />
@@ -184,7 +260,7 @@ function ReadPost() {
 
         <S.ScreenCancelButton
           style={{ display: openMenu ? "block" : "none" }}
-          onClick={openReplyMenuHandle}
+          onClick={() => setOpenMenu(false)}
         />
 
         <S.Wrapper>

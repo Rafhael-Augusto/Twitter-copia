@@ -2,8 +2,10 @@ import styled from "styled-components";
 
 export const Container = styled.div`
   position: absolute;
-  top: 30%;
-  left: 35%;
+  top: 50%;
+  left: 50%;
+
+  transform: translate(-50%, -50%);
 
   display: flex;
   justify-content: center;
@@ -12,17 +14,20 @@ export const Container = styled.div`
 
   z-index: 8;
 
+  @media (max-width: 1200px) {
+    width: 30%;
+  }
   @media (max-width: 1000px) {
     width: 35%;
   }
   @media (max-width: 768px) {
-    width: 40%;
-  }
-  @media (max-width: 600px) {
     width: 50%;
   }
+  @media (max-width: 600px) {
+    width: 80%;
+  }
   @media (max-width: 480px) {
-    width: 60%;
+    width: 80%;
   }
 `;
 
@@ -84,6 +89,22 @@ export const PostTextWrapper = styled.div`
   width: 80%;
   margin-left: 17.25%;
   margin-top: 1%;
+
+  @media (max-width: 1200px) {
+    margin-left: 16.2%;
+  }
+  @media (max-width: 1000px) {
+    margin-left: 16.5%;
+  }
+  @media (max-width: 768px) {
+    margin-left: 14.8%;
+  }
+  @media (max-width: 600px) {
+    margin-left: 12.2%;
+  }
+  @media (max-width: 480px) {
+    margin-left: 15.2%;
+  }
 `;
 
 export const Background = styled.div`

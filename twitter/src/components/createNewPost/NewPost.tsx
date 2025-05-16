@@ -40,14 +40,22 @@ function CreateNewPost() {
     e.preventDefault();
 
     if (textPreview || filePreview) {
-      axios.post(`${API_BASE_URL}/posts/`, {
-        username: userInfo?.username,
-        user_at: userInfo?.userat,
-        user: userInfo?.id,
-        profile: userInfo?.id,
-        text: textPreview,
-        attachments: filePreview,
-      });
+      axios.post(
+        `${API_BASE_URL}/posts/`,
+        {
+          username: userInfo?.username,
+          user_at: userInfo?.userat,
+          user: userInfo?.id,
+          profile: userInfo?.id,
+          text: textPreview,
+          attachments: filePreview,
+        },
+        {
+          headers: {
+            Authorization: `Token ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
       console.log(userInfo);
       setFilePreview(null);
@@ -59,9 +67,15 @@ function CreateNewPost() {
 
   useEffect(() => {
     const fetchUserInfo = () => {
-      axios.get(`${API_BASE_URL}/profiles/4/`).then((res) => {
-        setUserInfo(res.data);
-      });
+      axios
+        .get(`${API_BASE_URL}/profiles/${localStorage.getItem("userId")}/`, {
+          headers: {
+            Authorization: `Token ${localStorage.getItem("token")}`,
+          },
+        })
+        .then((res) => {
+          setUserInfo(res.data);
+        });
     };
 
     fetchUserInfo();
@@ -70,12 +84,20 @@ function CreateNewPost() {
   const updatePostsMade = () => {
     if (userInfo) {
       axios
-        .patch(`${API_BASE_URL}/profiles/${userInfo.user}/`, {
-          user: userInfo.user,
-          id: userInfo.id,
-          userat: userInfo.userat,
-          posts_made: Number(userInfo.posts_made) + 1,
-        })
+        .patch(
+          `${API_BASE_URL}/profiles/${userInfo.user}/`,
+          {
+            user: userInfo.user,
+            id: userInfo.id,
+            userat: userInfo.userat,
+            posts_made: Number(userInfo.posts_made) + 1,
+          },
+          {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }
+        )
         .then((res) => {
           console.log("Perfil atualizado", res);
         })

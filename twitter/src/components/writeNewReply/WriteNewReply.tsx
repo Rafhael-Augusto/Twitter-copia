@@ -10,25 +10,41 @@ type ReplyProp = {
   openReplyMenu: boolean;
   setOpenReplyMenu: React.Dispatch<React.SetStateAction<boolean>>;
   postId?: string;
+  userId?: string;
 };
 
-function NewReply({ openReplyMenu, setOpenReplyMenu, postId }: ReplyProp) {
+function NewReply({
+  openReplyMenu,
+  setOpenReplyMenu,
+  postId,
+  userId,
+}: ReplyProp) {
   const [replyMessage, setReplyMessage] = useState("");
 
   const [postInfo, setPostInfo] = useState<PostApiType>();
   const [publisherInfo, setPublisherInfo] = useState<ProfileApiType>();
 
+  const [userInfo, setUserInfo] = useState<ProfileApiType>();
+
   const SubmitReply = () => {
     if (replyMessage) {
       axios
-        .post(`${API_BASE_URL}/replies/`, {
-          username: "Rafhael Augusto",
-          userat: "Rafhael",
-          user: 1,
-          text: replyMessage,
-          post: postId,
-          profile: 1,
-        })
+        .post(
+          `${API_BASE_URL}/replies/`,
+          {
+            username: userInfo?.username,
+            userat: userInfo?.userat,
+            user: userInfo?.id,
+            text: replyMessage,
+            post: postId,
+            profile: userInfo?.id,
+          },
+          {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }
+        )
         .then((res) => {
           console.log("Comentario enviado", res.data);
         })
@@ -37,9 +53,17 @@ function NewReply({ openReplyMenu, setOpenReplyMenu, postId }: ReplyProp) {
         });
 
       axios
-        .patch(`${API_BASE_URL}/posts/${postId}/`, {
-          comments: Number(postInfo?.comments) + 1,
-        })
+        .patch(
+          `${API_BASE_URL}/posts/${postId}/`,
+          {
+            comments: Number(postInfo?.comments) + 1,
+          },
+          {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }
+        )
         .then((res) => {
           console.log("Post atualizado", res);
         })
@@ -52,16 +76,39 @@ function NewReply({ openReplyMenu, setOpenReplyMenu, postId }: ReplyProp) {
   };
 
   useEffect(() => {
-    axios.get(`${API_BASE_URL}/posts/${postId}`).then((res) => {
-      setPostInfo(res.data);
-    });
+    const fetchAsync = async () => {
+      try {
+        const [postRes, profileRes, userRes] = await Promise.all([
+          axios.get(`${API_BASE_URL}/posts/${postId}`, {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }),
+          axios.get(`${API_BASE_URL}/profiles/${Number(userId)}`, {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }),
+          axios.get(
+            `${API_BASE_URL}/profiles/${localStorage.getItem("userId")}`,
+            {
+              headers: {
+                Authorization: `Token ${localStorage.getItem("token")}`,
+              },
+            }
+          ),
+        ]);
 
-    if (postInfo) {
-      axios.get(`${API_BASE_URL}/profiles/${postInfo?.user}`).then((res) => {
-        setPublisherInfo(res.data);
-      });
-    }
-  }, [postId, postInfo, postInfo?.user]);
+        setPostInfo(postRes.data);
+        setPublisherInfo(profileRes.data);
+        setUserInfo(userRes.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchAsync();
+  }, [postId, userId]);
 
   return (
     <div>

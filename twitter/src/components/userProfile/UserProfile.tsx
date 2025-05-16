@@ -36,10 +36,29 @@ function UserProfile() {
       try {
         const [userRes, postsRes, repliesRes, userProfileRes] =
           await Promise.all([
-            axios.get(`${API_BASE_URL}/profiles/6/`),
-            axios.get(`${API_BASE_URL}/posts/`),
-            axios.get(`${API_BASE_URL}/replies/`),
-            axios.get(`${API_BASE_URL}/profiles/${userId}/`),
+            axios.get(
+              `${API_BASE_URL}/profiles/${localStorage.getItem("userId")}/`,
+              {
+                headers: {
+                  Authorization: `Token ${localStorage.getItem("token")}`,
+                },
+              }
+            ),
+            axios.get(`${API_BASE_URL}/posts/`, {
+              headers: {
+                Authorization: `Token ${localStorage.getItem("token")}`,
+              },
+            }),
+            axios.get(`${API_BASE_URL}/replies/`, {
+              headers: {
+                Authorization: `Token ${localStorage.getItem("token")}`,
+              },
+            }),
+            axios.get(`${API_BASE_URL}/profiles/${userId}/`, {
+              headers: {
+                Authorization: `Token ${localStorage.getItem("token")}`,
+              },
+            }),
           ]);
 
         setUserInfo(userRes.data);
@@ -67,11 +86,23 @@ function UserProfile() {
       : [...userInfo.following_ids, Number(userId)];
 
     try {
-      await axios.patch(`${API_BASE_URL}/profiles/${userInfo.id}/`, {
-        following_ids: updatedList,
-      });
+      await axios.patch(
+        `${API_BASE_URL}/profiles/${userInfo.id}/`,
+        {
+          following_ids: updatedList,
+        },
+        {
+          headers: {
+            Authorization: `Token ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
-      const res = await axios.get(`${API_BASE_URL}/profiles/${userInfo.id}/`);
+      const res = await axios.get(`${API_BASE_URL}/profiles/${userInfo.id}/`, {
+        headers: {
+          Authorization: `Token ${localStorage.getItem("token")}`,
+        },
+      });
       setUserInfo(res.data);
     } catch (err) {
       console.error("Erro ao seguir/deixar de seguir", err);

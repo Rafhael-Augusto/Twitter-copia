@@ -158,7 +158,7 @@ export const UserInfo = styled.div`
   align-items: center;
   gap: 8px;
 
-  width: 320px;
+  width: 240px;
   padding: 6px;
 
   border-radius: 32px;

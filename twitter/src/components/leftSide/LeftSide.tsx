@@ -18,14 +18,26 @@ function LeftSide() {
   };
 
   const GoToProfile = () => {
-    navigate("/Rafhael/1/profile");
+    navigate(`/${userInfo?.userat}/${userInfo?.id}/profile`);
   };
 
   useEffect(() => {
-    axios.get(`${API_BASE_URL}/profiles/1/`).then((res) => {
-      setUserInfo(res.data);
-    });
-  });
+    axios
+      .get(`${API_BASE_URL}/profiles/${localStorage.getItem("userId")}/`, {
+        headers: {
+          Authorization: `Token ${localStorage.getItem("token")}`,
+        },
+      })
+      .then((res) => {
+        setUserInfo(res.data);
+      });
+  }, []);
+
+  const logOut = () => {
+    navigate("/register");
+
+    localStorage.removeItem("token");
+  };
 
   return (
     <>
@@ -51,7 +63,7 @@ function LeftSide() {
               </S.Wrapper>
             </div>
             <S.SignOutMenu style={{ display: openMenu ? "flex" : "none" }}>
-              <S.SignOutButton>
+              <S.SignOutButton onClick={() => logOut()}>
                 Sair da conta @{userInfo?.userat}
               </S.SignOutButton>
             </S.SignOutMenu>
@@ -61,7 +73,6 @@ function LeftSide() {
                 <S.Username>{userInfo?.username}</S.Username>
                 <S.UserAt>@{userInfo?.userat}</S.UserAt>
               </div>
-              <S.OpenMenu>. . .</S.OpenMenu>
             </S.UserInfo>
           </S.ButtonsList>
         </S.Background>

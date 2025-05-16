@@ -28,24 +28,6 @@ function ReplyModel({ comment }: Comment) {
 
       <S.PostInfo>
         <S.PostText>{comment.text}</S.PostText>
-        <S.PostAttachment>
-          {comment.attachment ? (
-            <img
-              style={{ marginTop: "4px" }}
-              loading="lazy"
-              src={comment.attachment}
-              alt="Post Image"
-            />
-          ) : (
-            ""
-          )}
-
-          <S.PostInteract
-            style={{ marginTop: comment.attachment ? "10px" : "0px" }}
-          >
-            <S.PostUserInteract hovercolor="249, 54, 128, 0.4"></S.PostUserInteract>
-          </S.PostInteract>
-        </S.PostAttachment>
       </S.PostInfo>
     </S.Container>
   );

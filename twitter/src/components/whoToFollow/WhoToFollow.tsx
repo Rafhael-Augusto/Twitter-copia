@@ -13,13 +13,18 @@ function WhoToFollow() {
 
   useEffect(() => {
     const UpdateList = () => {
-      axios.get(`${API_BASE_URL}/profiles/`).then((res) => {
-        setProfiles(res.data);
-      });
+      axios
+        .get(`${API_BASE_URL}/profiles/`, {
+          headers: {
+            Authorization: `Token ${localStorage.getItem("token")}`,
+          },
+        })
+        .then((res) => {
+          setProfiles(res.data);
+        });
     };
 
-    UpdateList();
-    const interval = setInterval(UpdateList, 10000);
+    const interval = setInterval(UpdateList, 1000);
     return () => clearInterval(interval);
   }, []);
 
