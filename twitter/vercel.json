@@ -1,9 +1,3 @@
 {
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "/register",
-      "permanent": false
-    }
-  ]
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
