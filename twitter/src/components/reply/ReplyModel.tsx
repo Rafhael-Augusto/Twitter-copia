@@ -1,6 +1,9 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-import type { ReplyApiType } from "../../types";
+import API_BASE_URL from "../../config/api";
+import type { ProfileApiType, ReplyApiType } from "../../types";
 
 import * as S from "./styles";
 
@@ -11,16 +14,50 @@ type Comment = {
 function ReplyModel({ comment }: Comment) {
   const navigate = useNavigate();
 
+  const [state, setState] = useState({
+    userInfo: undefined as ProfileApiType | undefined,
+    publisherInfo: undefined as ProfileApiType | undefined,
+  });
+
   const visitProfile = () => {
     navigate(`/${comment.userat}/${comment.user}/profile`);
   };
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const [userRes, publisherRed] = await Promise.all([
+          axios.get(
+            `${API_BASE_URL}/profiles/${localStorage.getItem("userId")}/`,
+            {
+              headers: {
+                Authorization: `Token ${localStorage.getItem("token")}`,
+              },
+            }
+          ),
+          axios.get(`${API_BASE_URL}/profiles/${comment.user}/`, {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }),
+        ]);
+
+        setState((prev) => ({ ...prev, userInfo: userRes.data }));
+        setState((prev) => ({ ...prev, publisherInfo: publisherRed.data }));
+      } finally {
+        console.log("Dados fodas");
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
 
   return (
     <S.Container>
       <S.ProfileInfo>
         <S.ProfilePicture
           onClick={visitProfile}
-          src="https://i.pinimg.com/736x/d1/70/99/d17099bc26cf4cb9db8fbef0d6d6f8ca.jpg"
+          src={state.publisherInfo?.profile}
           alt="Profile Picture"
         />
         <S.UserName onClick={visitProfile}>{comment.username}</S.UserName>

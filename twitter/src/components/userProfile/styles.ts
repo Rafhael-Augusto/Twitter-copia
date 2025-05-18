@@ -121,17 +121,16 @@ export const PostCounter = styled.span`
 export const ProfileBanner = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: end;
+  align-items: center;
   max-width: 600px;
   max-height: 200px;
 
   & > div {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
     & > img {
       width: 100%;
+      height: 200px;
+
+      background-color: blue;
     }
   }
 
@@ -253,7 +252,7 @@ export const EditProfileButton = styled.button`
 
   padding: 8px;
   margin-top: 16px;
-  margin-right: 16px;
+  margin-left: 60%;
 
   border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 16px;

@@ -17,6 +17,8 @@ function Login({ isLoginOpen, setIsLoginOpen }: MenuType) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  const [error, setError] = useState(false);
+
   const createAccount = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -34,10 +36,12 @@ function Login({ isLoginOpen, setIsLoginOpen }: MenuType) {
 
           if (localStorage.getItem("token") !== undefined) {
             navigate("/home");
-          }
-        }
 
-        console.log(localStorage);
+            setError(false);
+          }
+        } else {
+          setError(true);
+        }
       } catch (err) {
         console.log(err);
 
@@ -74,6 +78,9 @@ function Login({ isLoginOpen, setIsLoginOpen }: MenuType) {
             placeholder="Senha"
             type="password"
           />
+          <S.AccountError style={{ display: error ? "block" : "none" }}>
+            Credenciais invalidas
+          </S.AccountError>
           <S.CreateAccountButton>Entrar</S.CreateAccountButton>
         </S.Form>
       </S.Wrapper>

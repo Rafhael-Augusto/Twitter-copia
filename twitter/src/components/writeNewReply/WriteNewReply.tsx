@@ -8,7 +8,7 @@ import * as S from "./styles";
 
 type ReplyProp = {
   openReplyMenu: boolean;
-  setOpenReplyMenu: React.Dispatch<React.SetStateAction<boolean>>;
+  setOpenReplyMenu: (value: boolean) => void;
   postId?: string;
   userId?: string;
 };
@@ -119,7 +119,7 @@ function NewReply({
       <S.Container style={{ display: openReplyMenu ? "block" : "none" }}>
         <S.Wrapper>
           <S.ProfileInfo>
-            <S.ProfilePicture src="/Logo.jpg" />
+            <S.ProfilePicture src={publisherInfo?.profile} />
             <S.Username>{publisherInfo?.username}</S.Username>
             <S.UserAt>@{publisherInfo?.userat}</S.UserAt>
           </S.ProfileInfo>
@@ -127,8 +127,7 @@ function NewReply({
             <S.PostText>{postInfo?.text}</S.PostText>
           </S.PostTextWrapper>
           <S.LoggedUserInfo>
-            <S.MyCockDiv />
-            <S.ProfilePicture src="/Logo.jpg" />
+            <S.ProfilePicture src={userInfo?.profile} />
             <S.ReplyText
               value={replyMessage}
               onChange={(e) => setReplyMessage(e.target.value)}

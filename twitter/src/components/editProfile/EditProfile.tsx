@@ -11,20 +11,20 @@ import { useParams } from "react-router-dom";
 
 type Prop = {
   isEditOpen: boolean;
-  setIsEditOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsEditOpen: (value: boolean) => void;
 };
 
 function EditProfile({ isEditOpen, setIsEditOpen }: Prop) {
   const profilePictureRef = useRef<HTMLInputElement>(null);
   const profileBannerRef = useRef<HTMLInputElement>(null);
 
-  const [PicturePreview, setPicturePreview] = useState<File | null>(null);
-  const [BannerPreview, setBannerPreview] = useState<File | null>(null);
-
-  const [username, setUsername] = useState("");
-  const [bio, setBio] = useState("");
-
-  const [userInfo, setUserInfo] = useState<ProfileApiType>();
+  const [state, setState] = useState({
+    picturePreview: undefined as File | undefined,
+    bannerPreview: undefined as File | undefined,
+    username: "",
+    bio: "",
+    userInfo: undefined as ProfileApiType | undefined,
+  });
 
   const { userId } = useParams();
 
@@ -46,7 +46,7 @@ function EditProfile({ isEditOpen, setIsEditOpen }: Prop) {
     const file = e.target.files?.[0];
 
     if (file) {
-      setPicturePreview(file);
+      setState((prev) => ({ ...prev, picturePreview: file }));
     }
   };
 
@@ -54,68 +54,86 @@ function EditProfile({ isEditOpen, setIsEditOpen }: Prop) {
     const file = e.target.files?.[0];
 
     if (file) {
-      setBannerPreview(file);
+      setState((prev) => ({ ...prev, bannerPreview: file }));
     }
   };
 
   const editProfile = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const putProfile = () => {
-      if (userInfo) {
-        setUsername(userInfo.username);
+    const updateProfile = async () => {
+      if (state.userInfo) {
+        const formData = new FormData();
 
-        axios
-          .patch(
-            `${API_BASE_URL}/profiles/${userId}/`,
-            {
-              username: username ? username : userInfo.username,
-              bio: bio,
-            },
-            {
+        formData.append(
+          "username",
+          state.username ? state.username : state.userInfo.username
+        );
+        formData.append("bio", state.bio ? state.bio : state.userInfo.bio);
+
+        if (state.picturePreview) {
+          formData.append("profile", state.picturePreview);
+        }
+        if (state.bannerPreview) {
+          formData.append("banner", state.bannerPreview);
+        }
+
+        try {
+          await Promise.all([
+            axios.patch(`${API_BASE_URL}/profiles/${userId}/`, formData, {
               headers: {
+                "Content-type": "multipart/form-data",
                 Authorization: `Token ${localStorage.getItem("token")}`,
               },
-            }
-          )
-          .then((res) => {
-            console.log("dados atualizados", res.data);
-          })
-          .catch((res) => {
-            console.error("Erro na atualizacao de dados", res);
-          });
+            }),
+          ]);
+        } finally {
+          console.log("perfil editado");
 
-        setTimeout(() => window.location.reload(), 2000);
+          setState((prev) => ({ ...prev, picturePreview: undefined }));
+          setState((prev) => ({ ...prev, bannerPreview: undefined }));
+
+          setIsEditOpen(false);
+        }
       }
     };
 
-    putProfile();
+    updateProfile();
   };
 
   useEffect(() => {
-    const fetchUserInfo = () => {
-      axios
-        .get(`${API_BASE_URL}/profiles/${userId}`, {
-          headers: {
-            Authorization: `Token ${localStorage.getItem("token")}`,
-          },
-        })
-        .then((res) => {
-          setUserInfo(res.data);
+    const fetchUserInfo = async () => {
+      try {
+        const [userRes] = await Promise.all([
+          axios.get(`${API_BASE_URL}/profiles/${userId}`, {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }),
+        ]);
 
-          setBio(res.data.bio);
-        });
+        setState((prev) => ({ ...prev, userInfo: userRes.data }));
+      } finally {
+        console.log("informacoes pegas");
+      }
     };
 
     fetchUserInfo();
-  }, [userId]);
+  }, [isEditOpen, userId]);
+
+  const closeGui = () => {
+    setIsEditOpen(false);
+
+    setState((prev) => ({ ...prev, picturePreview: undefined }));
+    setState((prev) => ({ ...prev, bannerPreview: undefined }));
+  };
 
   return (
     <S.Container style={{ display: isEditOpen ? "flex" : "none" }}>
       <S.EditContainer onSubmit={editProfile}>
         <S.Header>
           <div>
-            <S.CloseButton onClick={() => setIsEditOpen(false)} src="/x.svg" />
+            <S.CloseButton onClick={closeGui} src="/x.svg" />
             <S.EditProfileText>Editar perfil</S.EditProfileText>
           </div>
 
@@ -133,7 +151,9 @@ function EditProfile({ isEditOpen, setIsEditOpen }: Prop) {
             />
             <S.ProfileBanner
               src={
-                BannerPreview ? URL.createObjectURL(BannerPreview) : "/dog.jpeg"
+                state.bannerPreview
+                  ? URL.createObjectURL(state.bannerPreview)
+                  : state.userInfo?.banner
               }
             />
             <S.AddImageImage onClick={openBannerPic} src="/add-image.svg" />
@@ -148,9 +168,9 @@ function EditProfile({ isEditOpen, setIsEditOpen }: Prop) {
             />
             <S.ProfilePicture
               src={
-                PicturePreview
-                  ? URL.createObjectURL(PicturePreview)
-                  : "/dog.jpeg"
+                state.picturePreview
+                  ? URL.createObjectURL(state.picturePreview)
+                  : state.userInfo?.profile
               }
             />
             <S.AddProfilePicture
@@ -163,16 +183,18 @@ function EditProfile({ isEditOpen, setIsEditOpen }: Prop) {
         <S.UsernameBio>
           <S.NewUsername
             maxLength={30}
-            onChange={(e) => setUsername(e.target.value)}
-            defaultValue={userInfo?.username}
+            onChange={(e) =>
+              setState((prev) => ({ ...prev, username: e.target.value }))
+            }
+            defaultValue={state.userInfo?.username}
             placeholder="Nome"
           ></S.NewUsername>
           <S.UserBio
             maxLength={120}
             onChange={(e) => {
-              setBio(e.target.value);
+              setState((prev) => ({ ...prev, bio: e.target.value }));
             }}
-            defaultValue={userInfo?.bio}
+            defaultValue={state.userInfo?.bio}
             placeholder="Bio"
           ></S.UserBio>
         </S.UsernameBio>

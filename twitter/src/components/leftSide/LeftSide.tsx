@@ -68,7 +68,7 @@ function LeftSide() {
               </S.SignOutButton>
             </S.SignOutMenu>
             <S.UserInfo onClick={() => setOpenMenu(!openMenu)}>
-              <S.ProfilePicture src="/Logo.jpg" />
+              <S.ProfilePicture src={userInfo?.profile} />
               <div>
                 <S.Username>{userInfo?.username}</S.Username>
                 <S.UserAt>@{userInfo?.userat}</S.UserAt>

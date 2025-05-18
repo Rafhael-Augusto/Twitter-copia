@@ -1,33 +1,63 @@
 import styled from "styled-components";
 
 export const Container = styled.div`
-  position: relative;
+  position: absolute;
   color: white;
+
+  top: 0;
+  left: 22%;
 
   background-color: transparent;
   height: 100%;
+
+  @media (max-width: 1200px) {
+    left: 0%;
+  }
+
+  @media (max-width: 992px) {
+    left: 0%;
+  }
+  @media (max-width: 768px) {
+    left: 0%;
+  }
+  @media (max-width: 600px) {
+    left: 0%;
+  }
 `;
 
 export const Background = styled.div`
   height: 100px;
-  width: 240px;
+  width: 0px;
+
+  margin-right: 120px;
 
   @media (max-width: 1200px) {
     width: 0px;
-    margin-left: 64px;
+    margin-left: 300px;
   }
-
+  @media (max-width: 1000px) {
+    width: 0px;
+    margin-left: 200px;
+  }
   @media (max-width: 992px) {
     width: 0px;
-    margin-left: 120px;
+    margin-left: 200px;
   }
-  @media (max-width: 768px) {
+  @media (max-width: 820px) {
     width: 0px;
     margin-left: 100px;
   }
+  @media (max-width: 768px) {
+    width: 0px;
+    margin-left: 60px;
+  }
   @media (max-width: 600px) {
     width: 0px;
-    margin-left: 30px;
+    margin-left: 20px;
+  }
+  @media (max-width: 480px) {
+    width: 0px;
+    margin-left: -10px;
   }
 `;
 
@@ -142,14 +172,7 @@ export const Wrapper = styled.div`
   cursor: pointer;
 
   @media (max-width: 1200px) {
-    &:hover {
-      width: 20px;
-
-      border-radius: 0;
-      transition: none;
-
-      background-color: rgba(255, 255, 255, 0);
-    }
+    width: 0;
   }
 `;
 
@@ -175,16 +198,17 @@ export const UserInfo = styled.div`
 
   @media (max-width: 1200px) {
     width: 64px;
-    margin-right: 125px;
+    margin-left: 15px;
   }
   @media (max-width: 768px) {
     margin-top: 27px;
+    margin-left: 15px;
   }
   @media (max-width: 600px) {
-    margin-left: 126px;
+    margin-left: 80px;
   }
   @media (max-width: 480px) {
-    margin-left: 145px;
+    margin-left: 90px;
   }
 `;
 
@@ -237,7 +261,7 @@ export const SignOutMenu = styled.div`
   width: 220px;
 
   bottom: 80px;
-  right: 10px;
+  right: -110px;
 
   background-color: #000000;
 
@@ -260,7 +284,7 @@ export const SignOutMenu = styled.div`
     bottom: -100px;
   }
   @media (max-width: 480px) {
-    left: -15px;
+    left: -5px;
     bottom: -100px;
   }
 

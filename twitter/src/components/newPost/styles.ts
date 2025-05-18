@@ -16,6 +16,8 @@ export const Container = styled.div`
   cursor: pointer;
   transition: all 0.1s ease-in-out;
 
+  border: 1px solid #303336;
+
   &:hover {
     background-color: rgba(255, 255, 255, 0.05);
   }
@@ -71,6 +73,9 @@ export const OpenOptions = styled.button`
   @media (max-width: 600px) {
     margin-right: 150px;
   }
+  @media (max-width: 480px) {
+    margin-right: 180px;
+  }
 `;
 
 export const ProfilePicture = styled.img`
@@ -119,7 +124,7 @@ export const PostAttachment = styled.div`
 
   & > img,
   video {
-    max-width: 550px;
+    max-width: 380px;
     max-height: 380px;
 
     border-radius: 22px;

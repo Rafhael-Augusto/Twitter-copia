@@ -14,6 +14,7 @@ function Register({ isMenuOpen, setIsMenuOpen }: MenuType) {
   const [password, setPassword] = useState("");
 
   const [accountCreated, setAccountCreated] = useState(false);
+  const [error, setError] = useState(false);
 
   const closeMenu = () => {
     setIsMenuOpen(false);
@@ -33,15 +34,19 @@ function Register({ isMenuOpen, setIsMenuOpen }: MenuType) {
         const token = res.data.token;
         localStorage.setItem("token", token);
 
-        setAccountCreated(true);
+        if (res.data.token) {
+          setAccountCreated(true);
 
-        setUsername("");
-        setEmail("");
-        setPassword("");
+          setUsername("");
+          setEmail("");
+          setPassword("");
 
-        setTimeout(() => {
-          setAccountCreated(false);
-        }, 2000);
+          setTimeout(() => {
+            setAccountCreated(false);
+          }, 2000);
+        } else {
+          setError(true);
+        }
       } catch (err) {
         console.log(err);
       }
@@ -61,6 +66,7 @@ function Register({ isMenuOpen, setIsMenuOpen }: MenuType) {
 
           <S.Input
             required
+            onSelect={() => setError(false)}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="Nome"
             type="text"
@@ -68,12 +74,14 @@ function Register({ isMenuOpen, setIsMenuOpen }: MenuType) {
           />
           <S.Input
             required
+            onSelect={() => setError(false)}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
             type="email"
           />
           <S.Input
             required
+            onSelect={() => setError(false)}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Senha"
             type="password"
@@ -83,6 +91,9 @@ function Register({ isMenuOpen, setIsMenuOpen }: MenuType) {
           >
             Conta criada
           </S.AccountCreated>
+          <S.AccountError style={{ display: error ? "block" : "none" }}>
+            Usuario ja existe
+          </S.AccountError>
           <S.CreateAccountButton>Criar conta</S.CreateAccountButton>
         </S.Form>
       </S.Wrapper>

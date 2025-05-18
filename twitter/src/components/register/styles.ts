@@ -28,6 +28,24 @@ export const Wrapper = styled.div`
 
   height: 70%;
   width: 40%;
+
+  @media (max-width: 1000px) {
+    width: 55%;
+  }
+  @media (max-width: 768px) {
+    width: 65%;
+    margin: 10% auto;
+  }
+  @media (max-width: 600px) {
+    height: 60%;
+    width: 75%;
+    margin: 20% auto;
+  }
+  @media (max-width: 600px) {
+    height: 55%;
+    width: 80%;
+    margin: 30% auto;
+  }
 `;
 
 export const TwitterLogo = styled.img`
@@ -138,4 +156,15 @@ export const AccountCreated = styled.span`
 
   background-color: transparent;
   color: green;
+`;
+
+export const AccountError = styled.span`
+  align-self: center;
+
+  padding: 16px;
+  font-weight: bolder;
+  font-size: 24px;
+
+  background-color: transparent;
+  color: red;
 `;

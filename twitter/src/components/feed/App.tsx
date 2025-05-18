@@ -3,7 +3,6 @@ import axios from "axios";
 
 import CreateNewPost from "../createNewPost/NewPost";
 import Post from "../newPost/Post";
-import WhoToFollow from "../whoToFollow/WhoToFollow";
 import LeftSide from "../leftSide/LeftSide";
 
 import API_BASE_URL from "../../config/api";
@@ -41,13 +40,11 @@ function App() {
         setPosts(postsRes.data);
       } catch (err) {
         console.log("Erro ao pegar informacoes", err);
-      } finally {
-        console.log("Informacoes pegas com sucesso :D");
       }
     };
 
     fetchPosts();
-    const interval = setInterval(fetchPosts, 1000);
+    const interval = setInterval(fetchPosts, 2300);
     return () => clearInterval(interval);
   }, []);
 
@@ -94,7 +91,6 @@ function App() {
                 );
             })}
       </S.FeedPosts>
-      <WhoToFollow />
     </S.Container>
   );
 }

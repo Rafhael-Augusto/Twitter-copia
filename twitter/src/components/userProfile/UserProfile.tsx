@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 import LeftSide from "../leftSide/LeftSide";
-import WhoToFollow from "../whoToFollow/WhoToFollow";
 import ReplyModel from "../reply/ReplyModel";
 import Post from "../newPost/Post";
 import EditProfile from "../editProfile/EditProfile";
@@ -17,77 +16,104 @@ import PageLoading from "../loadingPage/LoadingPage";
 function UserProfile() {
   const navigate = useNavigate();
 
-  const [isInPost, setIsInPost] = useState(true);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-
-  const [posts, setPosts] = useState<[PostApiType]>();
-  const [userProfile, setUserProfile] = useState<ProfileApiType>();
-
-  const [userInfo, setUserInfo] = useState<ProfileApiType>();
-
-  const [loading, setLoading] = useState(true);
-
-  const [userReplies, setUserReplies] = useState<[ReplyApiType]>();
+  const [state, setState] = useState({
+    inPost: true,
+    editOpen: false,
+    posts: undefined as [PostApiType] | undefined,
+    userInfo: undefined as ProfileApiType | undefined,
+    loading: true,
+    userReplies: undefined as [ReplyApiType] | undefined,
+    ownerInfo: undefined as ProfileApiType | undefined,
+  });
 
   const { userId } = useParams();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [userRes, postsRes, repliesRes, userProfileRes] =
-          await Promise.all([
+        const [userRes, postsRes, repliesRes, ownerRes] = await Promise.all([
+          axios.get(
+            `${API_BASE_URL}/profiles/${localStorage.getItem("userId")}/`,
+            {
+              headers: {
+                Authorization: `Token ${localStorage.getItem("token")}`,
+              },
+            }
+          ),
+          axios.get(`${API_BASE_URL}/posts/`, {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }),
+          axios.get(`${API_BASE_URL}/replies/`, {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }),
+          axios.get(`${API_BASE_URL}/profiles/${userId}/`, {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }),
+        ]);
+
+        setState((prev) => ({ ...prev, userInfo: userRes.data }));
+        setState((prev) => ({ ...prev, posts: postsRes.data }));
+        setState((prev) => ({ ...prev, userReplies: repliesRes.data }));
+        setState((prev) => ({ ...prev, ownerInfo: ownerRes.data }));
+      } catch (err) {
+        console.log("Erro ao carregar perfil", err);
+      } finally {
+        console.log("carregado");
+        setState((prev) => ({ ...prev, loading: false }));
+      }
+    };
+
+    setState((prev) => ({ ...prev, loading: true }));
+    fetchData();
+  }, [userId]);
+
+  useEffect(() => {
+    if (!state.editOpen) {
+      const fetchUpdatedInfo = async () => {
+        try {
+          const [userRes, ownerRes] = await Promise.all([
             axios.get(
-              `${API_BASE_URL}/profiles/${localStorage.getItem("userId")}/`,
+              `${API_BASE_URL}/profiles/${localStorage.getItem("userId")}`,
               {
                 headers: {
                   Authorization: `Token ${localStorage.getItem("token")}`,
                 },
               }
             ),
-            axios.get(`${API_BASE_URL}/posts/`, {
-              headers: {
-                Authorization: `Token ${localStorage.getItem("token")}`,
-              },
-            }),
-            axios.get(`${API_BASE_URL}/replies/`, {
-              headers: {
-                Authorization: `Token ${localStorage.getItem("token")}`,
-              },
-            }),
-            axios.get(`${API_BASE_URL}/profiles/${userId}/`, {
+            axios.get(`${API_BASE_URL}/profiles/${userId}`, {
               headers: {
                 Authorization: `Token ${localStorage.getItem("token")}`,
               },
             }),
           ]);
 
-        setUserInfo(userRes.data);
-        setPosts(postsRes.data);
-        setUserReplies(repliesRes.data);
-        setUserProfile(userProfileRes.data);
-      } catch (err) {
-        console.log("Erro ao carregar perfil", err);
-      } finally {
-        console.log("carregado");
-        setLoading(false);
-      }
-    };
-
-    setLoading(true);
-    fetchData();
-  }, [userId]);
+          setState((prev) => ({ ...prev, userInfo: userRes.data }));
+          setState((prev) => ({ ...prev, ownerInfo: ownerRes.data }));
+        } finally {
+          console.log("Pego dados atualizados");
+        }
+      };
+      fetchUpdatedInfo();
+    }
+  }, [state.editOpen, userId]);
 
   const followUser = async () => {
-    if (!userInfo) return;
+    if (!state.userInfo) return;
 
-    const isFollowing = userInfo.following_ids.includes(Number(userId));
+    const isFollowing = state.userInfo.following_ids.includes(Number(userId));
     const updatedList = isFollowing
-      ? userInfo.following_ids.filter((user) => user !== Number(userId))
-      : [...userInfo.following_ids, Number(userId)];
+      ? state.userInfo.following_ids.filter((user) => user !== Number(userId))
+      : [...state.userInfo.following_ids, Number(userId)];
 
     try {
       await axios.patch(
-        `${API_BASE_URL}/profiles/${userInfo.id}/`,
+        `${API_BASE_URL}/profiles/${userId}/`,
         {
           following_ids: updatedList,
         },
@@ -98,34 +124,41 @@ function UserProfile() {
         }
       );
 
-      const res = await axios.get(`${API_BASE_URL}/profiles/${userInfo.id}/`, {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`,
-        },
-      });
-      setUserInfo(res.data);
+      const [profileRes] = await Promise.all([
+        axios.get(
+          `${API_BASE_URL}/profiles/${localStorage.getItem("userId")}/`,
+          {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }
+        ),
+      ]);
+      setState((prev) => ({ ...prev, userInfo: profileRes.data }));
     } catch (err) {
       console.error("Erro ao seguir/deixar de seguir", err);
     }
   };
 
   const handleClick = () => {
-    if (userInfo?.id === Number(userId)) {
-      setIsEditOpen(true);
+    if (state.userInfo?.id === Number(userId)) {
+      setState((prev) => ({ ...prev, editOpen: true }));
     } else {
       followUser();
     }
   };
 
   const changeButtonText = () => {
-    if (userInfo?.id === Number(userId)) {
+    console.log(state.userInfo?.id);
+    console.log(Number(userId));
+    if (state.userInfo?.id === Number(userId)) {
       return "Editar perfil";
     } else if (
-      userInfo?.id !== Number(userId) &&
-      !userInfo?.following_ids.includes(Number(userId))
+      state.userInfo?.id !== Number(userId) &&
+      !state.userInfo?.following_ids.includes(Number(userId))
     ) {
       return "Seguir perfil";
-    } else if (userInfo?.following_ids.includes(Number(userId))) {
+    } else if (state.userInfo?.following_ids.includes(Number(userId))) {
       return "Seguindo perfil";
     }
   };
@@ -135,17 +168,17 @@ function UserProfile() {
   };
 
   const postsStyle = {
-    borderBottom: isInPost ? "2px solid #1D90E0" : "2px solid #303336",
+    borderBottom: state.inPost ? "2px solid #1D90E0" : "2px solid #303336",
   };
 
   const mediaStyle = {
-    borderBottom: !isInPost ? "2px solid #1D90E0" : "2px solid #303336",
+    borderBottom: !state.inPost ? "2px solid #1D90E0" : "2px solid #303336",
   };
 
   return (
     <S.Background>
       <LeftSide />
-      {loading ? (
+      {state.loading ? (
         <PageLoading />
       ) : (
         <>
@@ -162,9 +195,9 @@ function UserProfile() {
                     />
                   </S.ReturnArrow>
                   <S.UserInfos>
-                    <S.Username>{userProfile?.username}</S.Username>
+                    <S.Username>{state.ownerInfo?.username}</S.Username>
                     <S.PostCounter>
-                      {userProfile?.posts_made} posts
+                      {state.ownerInfo?.posts_made} posts
                     </S.PostCounter>
                   </S.UserInfos>
                 </div>
@@ -172,7 +205,14 @@ function UserProfile() {
               <S.Wrapper>
                 <S.ProfileBanner>
                   <div>
-                    <img src="/dog.jpeg" alt="Profile Banner" />
+                    <img
+                      src={
+                        state.ownerInfo?.banner
+                          ? state.ownerInfo?.banner
+                          : "/dog.jpeg"
+                      }
+                      alt="Profile Banner"
+                    />
                   </div>
                   <S.EditProfileButton onClick={() => handleClick()}>
                     {changeButtonText()}
@@ -180,33 +220,37 @@ function UserProfile() {
                 </S.ProfileBanner>
                 <S.ProfilePicture>
                   <img
-                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjUSXHcFx8iQmHoULViI9o7QzLJlH95nEfIA&s"
+                    src={
+                      state.ownerInfo?.profile
+                        ? state.ownerInfo?.profile
+                        : "/dog.jpeg"
+                    }
                     alt="Profile Picture"
                   />
                 </S.ProfilePicture>
 
                 <S.ProfileInfos>
-                  <S.Username>{userProfile?.username}</S.Username>
-                  <S.ProfileAt>@{userProfile?.userat}</S.ProfileAt>
+                  <S.Username>{state.ownerInfo?.username}</S.Username>
+                  <S.ProfileAt>@{state.ownerInfo?.userat}</S.ProfileAt>
                   <S.Bio
-                    style={{ display: userProfile?.bio ? "flex" : "none" }}
+                    style={{ display: state.ownerInfo?.bio ? "flex" : "none" }}
                   >
-                    <span>{userProfile?.bio}</span>
+                    <span>{state.ownerInfo?.bio}</span>
                   </S.Bio>
                   <S.DateInfo
-                    style={{ marginTop: !userProfile?.bio ? "8px" : "0" }}
+                    style={{ marginTop: !state.ownerInfo?.bio ? "8px" : "0" }}
                   >
                     <S.CalendarIcon src="/calendar.svg" />
-                    <S.DateJoined>{userProfile?.created_at}</S.DateJoined>
+                    <S.DateJoined>{state.ownerInfo?.created_at}</S.DateJoined>
                   </S.DateInfo>
 
                   <S.DateInfo>
                     <S.Follow>
-                      <strong>{userProfile?.following_ids.length}</strong>{" "}
+                      <strong>{state.ownerInfo?.following_ids.length}</strong>{" "}
                       Seguindo
                     </S.Follow>
                     <S.Follow>
-                      <strong>{userProfile?.followers_ids.length}</strong>{" "}
+                      <strong>{state.ownerInfo?.followers_ids.length}</strong>{" "}
                       Seguidores
                     </S.Follow>
                   </S.DateInfo>
@@ -214,30 +258,28 @@ function UserProfile() {
 
                 <S.SelectButtonDiv>
                   <S.SelectButton
-                    onClick={() => setIsInPost(true)}
+                    onClick={() =>
+                      setState((prev) => ({ ...prev, inPost: true }))
+                    }
                     style={postsStyle}
                   >
                     Posts
                   </S.SelectButton>
                   <S.SelectButton
-                    onClick={() => setIsInPost(false)}
+                    onClick={() =>
+                      setState((prev) => ({ ...prev, inPost: false }))
+                    }
                     style={mediaStyle}
                   >
                     Comentarios
                   </S.SelectButton>
                 </S.SelectButtonDiv>
 
-                {isInPost && posts
-                  ? posts.map((post) => {
+                {state.inPost && state.posts
+                  ? state.posts.map((post) => {
                       if (post.user === Number(userId)) {
                         return (
-                          <div
-                            style={{
-                              border: "2px solid #303336",
-                              borderTop: "none",
-                            }}
-                            key={post.id}
-                          >
+                          <div key={post.id}>
                             <Post item={post}></Post>
                           </div>
                         );
@@ -245,8 +287,8 @@ function UserProfile() {
                     })
                   : ""}
 
-                {!isInPost && userReplies
-                  ? userReplies.map((reply) => {
+                {!state.inPost && state.userReplies
+                  ? state.userReplies.map((reply) => {
                       if (reply.user === Number(userId)) {
                         return (
                           <div key={reply.id}>
@@ -260,13 +302,14 @@ function UserProfile() {
             </S.ContainerDiv>
 
             <EditProfile
-              isEditOpen={isEditOpen}
-              setIsEditOpen={setIsEditOpen}
+              isEditOpen={state.editOpen}
+              setIsEditOpen={(value: boolean) =>
+                setState((prev) => ({ ...prev, editOpen: value }))
+              }
             />
           </S.Container>
         </>
       )}
-      <WhoToFollow />
     </S.Background>
   );
 }

@@ -37,7 +37,7 @@ export const FeedPosts = styled.ul`
     margin-left: 50px;
   }
   @media (max-width: 480px) {
-    width: 350px;
+    width: 420px;
     margin-left: 60px;
   }
 `;

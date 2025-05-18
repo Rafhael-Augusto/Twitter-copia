@@ -7,10 +7,10 @@ export const Container = styled.div`
 
   transform: translate(-50%, -50%);
 
-  display: flex;
-  justify-content: center;
-
   width: 25%;
+  height: 70%;
+
+  background-color: transparent;
 
   z-index: 8;
 
@@ -34,7 +34,8 @@ export const Container = styled.div`
 export const Wrapper = styled.div`
   background-color: #000000;
 
-  width: 100%;
+  width: 120%;
+  height: 50%;
 
   border-radius: 32px;
 `;
@@ -48,7 +49,7 @@ export const ProfileInfo = styled.div`
 
   padding: 8px;
   padding-top: 32px;
-  margin-top: 32px;
+  margin-top: 77px;
 
   gap: 8px;
 
@@ -82,12 +83,14 @@ export const PostText = styled.span`
 
   word-wrap: break-word;
   overflow-wrap: break-word;
+
+  background-color: transparent;
 `;
 
 export const PostTextWrapper = styled.div`
   background-color: transparent;
   width: 80%;
-  margin-left: 17.25%;
+  margin-left: 13.25%;
   margin-top: 1%;
 
   @media (max-width: 1200px) {
@@ -175,16 +178,4 @@ export const ReplyDiv = styled.div`
 
   height: 40%;
   width: 100%;
-`;
-
-export const MyCockDiv = styled.div`
-  position: absolute;
-
-  top: 38.45%;
-  left: 7.5%;
-
-  height: 14%;
-  width: 1%;
-
-  background-color: rgba(255, 255, 255, 0.1);
 `;

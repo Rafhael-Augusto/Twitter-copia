@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import API_BASE_URL from "../../config/api";
@@ -8,6 +9,8 @@ import type { ProfileApiType } from "../../types";
 import * as S from "./styles";
 
 function CreateNewPost() {
+  const navigate = useNavigate();
+
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [filePreview, setFilePreview] = useState<File | null>(null);
@@ -39,30 +42,38 @@ function CreateNewPost() {
   const publishNewPost = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (textPreview || filePreview) {
-      axios.post(
-        `${API_BASE_URL}/posts/`,
-        {
-          username: userInfo?.username,
-          user_at: userInfo?.userat,
-          user: userInfo?.id,
-          profile: userInfo?.id,
-          text: textPreview,
-          attachments: filePreview,
-        },
-        {
-          headers: {
-            Authorization: `Token ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+    const postPost = async () => {
+      if (textPreview || filePreview) {
+        const formData = new FormData();
 
-      console.log(userInfo);
+        formData.append("username", userInfo?.username || "");
+        formData.append("user_at", userInfo?.userat || "");
+        formData.append("user", String(userInfo?.id) || "");
+        formData.append("profile", String(userInfo?.id) || "");
+        formData.append("text", textPreview || "");
+
+        if (filePreview) {
+          formData.append("attachment", filePreview);
+        }
+
+        try {
+          await axios.post(`${API_BASE_URL}/posts/`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          });
+        } catch (err) {
+          console.log(err);
+        }
+      }
       setFilePreview(null);
       setTextPreview("");
 
       updatePostsMade();
-    }
+    };
+
+    postPost();
   };
 
   useEffect(() => {
@@ -107,10 +118,14 @@ function CreateNewPost() {
     }
   };
 
+  const userProfile = () => {
+    navigate(`/${userInfo?.userat}/${userInfo?.id}/profile`);
+  };
+
   return (
     <S.Form onSubmit={(e) => publishNewPost(e)}>
       <S.PostInfos>
-        <S.ProfilePicture src="https://i.pinimg.com/736x/d1/70/99/d17099bc26cf4cb9db8fbef0d6d6f8ca.jpg" />
+        <S.ProfilePicture onClick={userProfile} src={userInfo?.profile} />
         <S.InputText
           maxLength={200}
           placeholder="Nova publicação"

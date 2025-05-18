@@ -155,7 +155,7 @@ export const PostAttachment = styled.div`
 
   & > img,
   video {
-    max-width: 550px;
+    max-width: 460px;
     max-height: 380px;
 
     border-radius: 22px;

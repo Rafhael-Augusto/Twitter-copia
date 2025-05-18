@@ -23,21 +23,17 @@ function Post({ item }: PostApi) {
     const fetchUserInfo = async () => {
       try {
         const [userRes] = await Promise.all([
-          axios.get(
-            `${API_BASE_URL}/profiles/${localStorage.getItem("userId")}/`,
-            {
-              headers: {
-                Authorization: `Token ${localStorage.getItem("token")}`,
-              },
-            }
-          ),
+          axios.get(`${API_BASE_URL}/profiles/${item.profile}/`, {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }),
         ]);
 
         setUserInfo(userRes.data);
       } catch (err) {
-        console.log("erroAAAAAAAAA", err);
+        console.log(err);
       } finally {
-        console.log("Dados pegos");
         setLoaded(true);
       }
     };
@@ -94,10 +90,7 @@ function Post({ item }: PostApi) {
       {loaded ? (
         <S.Container onClick={OpenPost}>
           <S.ProfileInfo>
-            <S.ProfilePicture
-              src="https://i.pinimg.com/736x/d1/70/99/d17099bc26cf4cb9db8fbef0d6d6f8ca.jpg"
-              alt="Profile Picture"
-            />
+            <S.ProfilePicture src={userInfo?.profile} alt="Profile Picture" />
             <div style={{ position: "relative" }}>
               <S.UserName>{item.username}</S.UserName>
               <S.EditedPost

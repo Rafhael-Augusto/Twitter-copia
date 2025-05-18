@@ -12,8 +12,7 @@ export const Container = styled.div`
 
   padding: 20px;
 
-  border-bottom: 1px solid #303336;
-  border-top: 1px solid #303336;
+  border: 1px solid #303336;
   transition: all 0.1s ease-in-out;
 
   &:hover {

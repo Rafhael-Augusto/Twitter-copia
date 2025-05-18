@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
 import LeftSide from "../leftSide/LeftSide";
-import WhoToFollow from "../whoToFollow/WhoToFollow";
 import NewReply from "../writeNewReply/WriteNewReply";
 import ReplyModel from "../reply/ReplyModel";
 
@@ -15,34 +14,60 @@ import * as S from "./styles";
 function ReadPost() {
   const navigate = useNavigate();
 
-  const [postInfo, setPostInfo] = useState<PostApiType>();
-  const [repliesInfo, setRepliesInfo] = useState<[ReplyApiType]>();
-  const [date, setDate] = useState("");
-
-  const [openMenu, setOpenMenu] = useState(false);
-  const [canLike, setCanLike] = useState(true);
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [newEditMessage, setNewEditedMessage] = useState("");
-
-  const [openReplyMenu, setOpenReplyMenu] = useState(false);
-
-  const [userInfo, setUserInfo] = useState<ProfileApiType>();
-
-  const { postId, userId } = useParams();
+  const [state, setState] = useState({
+    postInfo: undefined as PostApiType | undefined,
+    repliesInfo: undefined as [ReplyApiType] | undefined,
+    date: "",
+    openMenu: false,
+    canLike: true,
+    isEditing: false,
+    newEditMessage: "",
+    openReplyMenu: false,
+    userInfo: undefined as ProfileApiType | undefined,
+    publisherInfo: undefined as ProfileApiType | undefined,
+  });
 
   const returnHome = () => {
     navigate("/home");
   };
 
   const visitProfile = () => {
-    navigate(`/${postInfo?.user_at}/${postInfo?.user}/profile`);
+    navigate(`/${state.postInfo?.user_at}/${state.postInfo?.user}/profile`);
   };
+
+  const { postId, userId } = useParams();
+
+  useEffect(() => {
+    const fetchReplies = async () => {
+      try {
+        const [postsRes, repliesRes] = await Promise.all([
+          axios.get(`${API_BASE_URL}/posts/${postId}`, {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }),
+
+          axios.get(`${API_BASE_URL}/replies/`, {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }),
+        ]);
+
+        setState((prev) => ({ ...prev, postInfo: postsRes.data }));
+        setState((prev) => ({ ...prev, repliesInfo: repliesRes.data }));
+      } finally {
+        console.log("pronto");
+      }
+    };
+
+    fetchReplies();
+  }, [state.openReplyMenu]);
 
   useEffect(() => {
     const fetchInfo = async () => {
       try {
-        const [userRes, postRes, repliesRes] = await Promise.all([
+        const [userRes, postRes, repliesRes, publisherRes] = await Promise.all([
           axios.get(
             `${API_BASE_URL}/profiles/${localStorage.getItem("userId")}/`,
             {
@@ -61,184 +86,148 @@ function ReadPost() {
               Authorization: `Token ${localStorage.getItem("token")}`,
             },
           }),
+          axios.get(`${API_BASE_URL}/profiles/${Number(userId)}/`, {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }),
         ]);
 
-        setUserInfo(userRes.data);
-        setPostInfo(postRes.data);
-        setRepliesInfo(repliesRes.data);
+        setState((prev) => ({ ...prev, userInfo: userRes.data }));
+        setState((prev) => ({ ...prev, postInfo: postRes.data }));
+        setState((prev) => ({ ...prev, repliesInfo: repliesRes.data }));
+        setState((prev) => ({ ...prev, publisherInfo: publisherRes.data }));
       } catch (err) {
-        console.log("Erro ao buscar dados", err);
+        console.log(err);
       } finally {
-        if (postInfo) {
-          const date = new Date(postInfo.created_at);
+        if (state.postInfo) {
+          const date = new Date(state.postInfo.created_at);
           const formatted = date.toLocaleDateString("pt-BR");
-          setDate(formatted);
+          setState((prev) => ({ ...prev, date: formatted }));
         }
       }
     };
 
     fetchInfo();
-    const interval = setInterval(fetchInfo, 500);
-    return () => clearInterval(interval);
-  }, [postId, postInfo]);
-
-  useEffect(() => {
-    const fetchPostInfo = () => {
-      axios
-        .get(`${API_BASE_URL}/posts/${postId}/`, {
-          headers: {
-            Authorization: `Token ${localStorage.getItem("token")}`,
-          },
-        })
-        .then((res) => {
-          setNewEditedMessage(res.data.text);
-        });
-    };
-
-    fetchPostInfo();
-  }, [postId]);
+  }, []);
 
   const likePost = () => {
-    if (postInfo && canLike) {
-      setCanLike(false);
-      const updatePost = () => {
-        if (userInfo && !userInfo.posts_liked.includes(postInfo.id)) {
-          const updatedList = [...userInfo.posts_liked, postInfo.id];
+    const updatePost = async () => {
+      if (state.postInfo && state.canLike && state.userInfo) {
+        setState((prev) => ({ ...prev, canLike: false }));
 
-          axios
-            .patch(
+        const isLiked = state.userInfo?.posts_liked.includes(state.postInfo.id);
+        const updatedLikes = isLiked
+          ? state.postInfo.likes - 1
+          : state.postInfo.likes + 1;
+        const updatedPostsLiked = isLiked
+          ? state.userInfo.posts_liked.filter((id) => id !== state.postInfo?.id)
+          : [...state.userInfo.posts_liked, state.postInfo.id];
+
+        try {
+          await Promise.all([
+            axios.patch(
               `${API_BASE_URL}/posts/${postId}/`,
-              {
-                likes: postInfo.likes + 1,
-              },
+              { likes: updatedLikes },
               {
                 headers: {
                   Authorization: `Token ${localStorage.getItem("token")}`,
                 },
               }
-            )
-            .then((res) => {
-              console.log("Post atualizado", res.data);
-            })
-            .catch((res) => {
-              console.error("Erro na atualizacao do post", res);
-            });
+            ),
+            axios.patch(
+              `${API_BASE_URL}/profiles/${state.userInfo.id}/`,
+              { posts_liked: updatedPostsLiked },
+              {
+                headers: {
+                  Authorization: `Token ${localStorage.getItem("token")}`,
+                },
+              }
+            ),
+          ]);
 
-          axios
-            .get(`${API_BASE_URL}/posts/${postId}/`, {
+          const [postRes, userRes] = await Promise.all([
+            axios.get(`${API_BASE_URL}/posts/${postId}`, {
               headers: {
                 Authorization: `Token ${localStorage.getItem("token")}`,
               },
-            })
-            .then((res) => {
-              setPostInfo(res.data);
-            });
+            }),
+            axios.get(`${API_BASE_URL}/profiles/${userId}`, {
+              headers: {
+                Authorization: `Token ${localStorage.getItem("token")}`,
+              },
+            }),
+          ]);
 
-          axios.patch(
-            `${API_BASE_URL}/profiles/${userInfo.id}/`,
-            {
-              posts_liked: updatedList,
-            },
-            {
-              headers: {
-                Authorization: `Token ${localStorage.getItem("token")}`,
-              },
-            }
-          );
-        } else if (userInfo && userInfo.posts_liked.includes(postInfo.id)) {
-          const updatedList = [
-            ...userInfo.posts_liked.filter((item) => item !== postInfo.id),
-          ];
-          axios.patch(
-            `${API_BASE_URL}/posts/${postId}/`,
-            {
-              likes: postInfo.likes - 1,
-            },
-            {
-              headers: {
-                Authorization: `Token ${localStorage.getItem("token")}`,
-              },
-            }
-          );
-
-          axios.patch(
-            `${API_BASE_URL}/profiles/${userInfo.id}/`,
-            {
-              posts_liked: updatedList,
-            },
-            {
-              headers: {
-                Authorization: `Token ${localStorage.getItem("token")}`,
-              },
-            }
+          setState((prev) => ({ ...prev, postInfo: postRes.data }));
+          setState((prev) => ({ ...prev, userInfo: userRes.data }));
+        } catch (err) {
+          console.error("Erro ao atualizar likes:", err);
+        } finally {
+          setTimeout(
+            () => setState((prev) => ({ ...prev, canLike: true })),
+            200
           );
         }
+      }
+    };
 
-        setTimeout(() => setCanLike(true), 1000);
-      };
-      updatePost();
-    }
+    updatePost();
   };
 
   const openMenuEvent = () => {
-    setOpenMenu((prev) => !prev);
+    setState((prev) => ({ ...prev, openMenu: !prev.openMenu }));
   };
 
   const handleEditing = () => {
-    setIsEditing((prev) => !prev);
-    setOpenMenu(false);
+    setState((prev) => ({ ...prev, isEditing: !prev.isEditing }));
+    setState((prev) => ({ ...prev, openMenu: false }));
   };
 
-  const updatePost = () => {
-    if (newEditMessage) {
-      axios
-        .patch(
-          `${API_BASE_URL}/posts/${postId}/`,
-          {
-            text: newEditMessage,
-            post_edited: true,
-          },
-          {
-            headers: {
-              Authorization: `Token ${localStorage.getItem("token")}`,
+  const updatePost = async () => {
+    if (state.newEditMessage) {
+      try {
+        await Promise.all([
+          axios.patch(
+            `${API_BASE_URL}/posts/${postId}/`,
+            {
+              text: state.newEditMessage,
+              post_edited: true,
             },
-          }
-        )
-        .then((res) => {
-          console.log("Post atualizado", res.data);
-
-          setIsEditing(false);
-          setOpenMenu(false);
-        })
-        .catch((res) => {
-          console.error("Erro na atualizacao do post", res);
-        });
+            {
+              headers: {
+                Authorization: `Token ${localStorage.getItem("token")}`,
+              },
+            }
+          ),
+        ]);
+      } finally {
+        setState((prev) => ({ ...prev, isEditing: false }));
+        setState((prev) => ({ ...prev, openMenu: false }));
+      }
     }
   };
 
-  const deletePost = () => {
-    axios
-      .delete(`${API_BASE_URL}/posts/${postId}/`, {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`,
-        },
-      })
-      .then((res) => {
-        console.log("Post deletado", res.data);
+  const deletePost = async () => {
+    try {
+      await Promise.all([
+        axios.delete(`${API_BASE_URL}/posts/${postId}/`, {
+          headers: {
+            Authorization: `Token ${localStorage.getItem("token")}`,
+          },
+        }),
+      ]);
+    } finally {
+      setState((prev) => ({ ...prev, isEditing: false }));
+      setState((prev) => ({ ...prev, openMenu: false }));
 
-        setIsEditing(false);
-        setOpenMenu(false);
-
-        navigate("/home");
-      })
-      .catch((res) => {
-        console.error("Erro ao deletar o post", res);
-      });
+      navigate("/home");
+    }
   };
 
   const openReplyMenuHandle = () => {
     const change = () => {
-      setOpenReplyMenu(true);
+      setState((prev) => ({ ...prev, openReplyMenu: true }));
     };
 
     change();
@@ -246,12 +235,14 @@ function ReadPost() {
 
   return (
     <div>
-      {openReplyMenu && (
+      {state.openReplyMenu && (
         <NewReply
           postId={postId}
           userId={userId}
-          openReplyMenu={openReplyMenu}
-          setOpenReplyMenu={setOpenReplyMenu}
+          openReplyMenu={state.openReplyMenu}
+          setOpenReplyMenu={(value: boolean) =>
+            setState((prev) => ({ ...prev, openReplyMenu: value }))
+          }
         />
       )}
 
@@ -259,8 +250,8 @@ function ReadPost() {
         <LeftSide />
 
         <S.ScreenCancelButton
-          style={{ display: openMenu ? "block" : "none" }}
-          onClick={() => setOpenMenu(false)}
+          style={{ display: state.openMenu ? "block" : "none" }}
+          onClick={() => setState((prev) => ({ ...prev, openMenu: false }))}
         />
 
         <S.Wrapper>
@@ -283,17 +274,17 @@ function ReadPost() {
               <S.ProfileInfo>
                 <S.ProfilePicture
                   onClick={visitProfile}
-                  src="https://i.pinimg.com/736x/d1/70/99/d17099bc26cf4cb9db8fbef0d6d6f8ca.jpg"
+                  src={state.publisherInfo?.profile}
                   alt="Profile Picture"
                 />
                 <div>
                   <S.OptionsDiv>
                     <S.UserName onClick={visitProfile}>
-                      {postInfo?.username}
+                      {state.postInfo?.username}
                     </S.UserName>
                     <S.EditedPost
                       style={{
-                        display: postInfo?.post_edited ? "block" : "none",
+                        display: state.postInfo?.post_edited ? "block" : "none",
                       }}
                     >
                       <span style={{ position: "absolute" }}>(editado)</span>
@@ -308,14 +299,14 @@ function ReadPost() {
                     </S.OpenOptions>
                     <S.SelectionMenu
                       style={{
-                        display: openMenu ? "flex" : "none",
+                        display: state.openMenu ? "flex" : "none",
                       }}
                     >
                       <S.ActionsContainer>
                         <S.ActionDecorations
                           onClick={handleEditing}
                           style={{
-                            backgroundColor: isEditing
+                            backgroundColor: state.isEditing
                               ? "rgba(255, 255, 255, 0.08)"
                               : "",
                           }}
@@ -336,44 +327,55 @@ function ReadPost() {
                     </S.SelectionMenu>
                   </S.OptionsDiv>
                   <S.UserAt onClick={visitProfile}>
-                    @{postInfo?.user_at}
+                    @{state.postInfo?.user_at}
                   </S.UserAt>
                 </div>
               </S.ProfileInfo>
 
               <S.PostInfo>
-                <S.PostText style={{ display: isEditing ? "none" : "block" }}>
-                  {postInfo?.text}
+                <S.PostText
+                  style={{ display: state.isEditing ? "none" : "block" }}
+                >
+                  {state.postInfo?.text}
                 </S.PostText>
                 <S.EditedMessageInput
-                  style={{ display: !isEditing ? "none" : "block" }}
+                  style={{ display: !state.isEditing ? "none" : "block" }}
                   maxLength={200}
                   placeholder="Nova mensagem"
-                  onChange={(e) => setNewEditedMessage(e.target.value)}
-                  value={newEditMessage}
+                  onChange={(e) =>
+                    setState((prev) => ({
+                      ...prev,
+                      newEditMessage: e.target.value,
+                    }))
+                  }
+                  value={state.newEditMessage}
                 ></S.EditedMessageInput>
                 <S.ContinueButtonsContainer
-                  style={{ display: isEditing ? "flex" : "none" }}
+                  style={{ display: state.isEditing ? "flex" : "none" }}
                 >
                   <S.ContinueButton onClick={updatePost}>
                     Salvar
                   </S.ContinueButton>
-                  <S.ContinueButton onClick={() => setIsEditing(false)}>
+                  <S.ContinueButton
+                    onClick={() =>
+                      setState((prev) => ({ ...prev, isEditing: false }))
+                    }
+                  >
                     Cancelar
                   </S.ContinueButton>
                 </S.ContinueButtonsContainer>
                 <S.PostAttachment>
-                  {postInfo?.attachment ? (
+                  {state.postInfo?.attachment ? (
                     <img
                       style={{ marginTop: "4px" }}
                       loading="lazy"
-                      src={postInfo?.attachment}
+                      src={state.postInfo?.attachment}
                       alt="Post Image"
                     />
                   ) : (
                     ""
                   )}
-                  <S.TimePosted>{date}</S.TimePosted>
+                  <S.TimePosted>{state.date}</S.TimePosted>
                   <S.PostInteract>
                     <S.PostUserInteract
                       onClick={openReplyMenuHandle}
@@ -386,17 +388,19 @@ function ReadPost() {
                           hovercolor="29, 146, 227, 0.4"
                         />
                       </div>
-                      <span>{postInfo?.comments}</span>
+                      <span>{state.postInfo?.comments}</span>
                     </S.PostUserInteract>
                     <S.PostUserInteract hovercolor="249, 54, 128, 0.4">
-                      {postInfo ? (
+                      {state.postInfo ? (
                         <div
                           onClick={likePost}
                           style={{ position: "relative" }}
                         >
                           <img
                             src={
-                              userInfo?.posts_liked.includes(postInfo.id)
+                              state.userInfo?.posts_liked.includes(
+                                state.postInfo.id
+                              )
                                 ? "/fullHeart.png"
                                 : "/heart.svg"
                             }
@@ -410,7 +414,7 @@ function ReadPost() {
                       ) : (
                         ""
                       )}
-                      <span>{postInfo?.likes}</span>
+                      <span>{state.postInfo?.likes}</span>
                     </S.PostUserInteract>
                     <S.PostUserInteract hovercolor="0, 186, 124, 0.4">
                       <div style={{ position: "relative" }}>
@@ -420,7 +424,7 @@ function ReadPost() {
                           hovercolor="0, 186, 124, 0.4"
                         />
                       </div>
-                      <span>{postInfo?.views}</span>
+                      <span>{state.postInfo?.views}</span>
                     </S.PostUserInteract>
                     <S.PostUserInteract>
                       <div style={{ position: "relative" }}>
@@ -436,9 +440,9 @@ function ReadPost() {
               </S.PostInfo>
             </S.Container>
             <S.Replies>
-              {repliesInfo && postInfo
-                ? repliesInfo.map((reply) => {
-                    if (reply.post === postInfo.id) {
+              {state.repliesInfo && state.postInfo
+                ? state.repliesInfo.map((reply) => {
+                    if (reply.post === Number(postId)) {
                       return (
                         <ul key={reply.id}>
                           <ReplyModel comment={reply} />
@@ -450,7 +454,6 @@ function ReadPost() {
             </S.Replies>
           </S.Div>
         </S.Wrapper>
-        <WhoToFollow />
       </S.Background>
     </div>
   );

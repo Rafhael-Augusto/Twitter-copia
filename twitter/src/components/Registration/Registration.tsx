@@ -22,7 +22,7 @@ function Registration() {
       <Register isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
       <Login isLoginOpen={isLoginOpen} setIsLoginOpen={setIsLoginOpen} />
       <S.TwitterLogo src="/twitter.png" />
-      <div>
+      <S.Div>
         <S.HappeningNow>Acontecendo agora</S.HappeningNow>
         <S.SubscribeText>Inscreva-se hoje mesmo.</S.SubscribeText>
         <S.Buttons>
@@ -32,7 +32,7 @@ function Registration() {
           <S.HaveAccount>Já tem uma conta?</S.HaveAccount>
           <S.LoginButton onClick={openLoginMenu}>Entrar</S.LoginButton>
         </S.Buttons>
-      </div>
+      </S.Div>
     </S.Container>
   );
 }
