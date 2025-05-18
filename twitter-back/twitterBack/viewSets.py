@@ -16,7 +16,6 @@ class ReplyViewSet(viewsets.ModelViewSet):
     queryset = Reply.objects.all().order_by('-created_at')
     serializer_class = ReplySerializer
 
-@permission_classes([IsAuthenticated])
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.annotate(followers_count=Func(F('followers_ids'), function='CARDINALITY', output_field=IntegerField())).order_by('-followers_count')
     serializer_class = ProfileSerializer
