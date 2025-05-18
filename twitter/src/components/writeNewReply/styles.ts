@@ -7,10 +7,10 @@ export const Container = styled.div`
 
   transform: translate(-50%, -50%);
 
-  width: 25%;
-  height: 70%;
-
   background-color: transparent;
+
+  width: 25%;
+  height: 30%;
 
   z-index: 8;
 
@@ -34,8 +34,8 @@ export const Container = styled.div`
 export const Wrapper = styled.div`
   background-color: #000000;
 
-  width: 120%;
-  height: 50%;
+  width: 100%;
+  height: 100%;
 
   border-radius: 32px;
 `;
@@ -47,9 +47,7 @@ export const ProfileInfo = styled.div`
 
   height: 12px;
 
-  padding: 8px;
-  padding-top: 32px;
-  margin-top: 77px;
+  padding: 12px;
 
   gap: 8px;
 
@@ -61,18 +59,20 @@ export const ProfilePicture = styled.img`
   width: 42px;
 
   border-radius: 50%;
-  margin-top: 3%;
+  margin-top: 10%;
 `;
 
 export const UserAt = styled.h3`
   font-size: 16px;
   font-weight: bold;
   color: rgba(255, 255, 255, 0.3);
+  margin-top: 3%;
 `;
 
 export const Username = styled.h2`
   font-size: 16px;
   font-weight: bolder;
+  margin-top: 3%;
 `;
 
 export const PostText = styled.span`
@@ -85,6 +85,8 @@ export const PostText = styled.span`
   overflow-wrap: break-word;
 
   background-color: transparent;
+
+  margin-left: 4.2%;
 `;
 
 export const PostTextWrapper = styled.div`

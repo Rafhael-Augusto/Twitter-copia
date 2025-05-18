@@ -77,44 +77,52 @@ function CreateNewPost() {
   };
 
   useEffect(() => {
-    const fetchUserInfo = () => {
-      axios
-        .get(`${API_BASE_URL}/profiles/${localStorage.getItem("userId")}/`, {
-          headers: {
-            Authorization: `Token ${localStorage.getItem("token")}`,
-          },
-        })
-        .then((res) => {
-          setUserInfo(res.data);
-        });
+    const fetchUserInfo = async () => {
+      try {
+        await axios
+          .get(`${API_BASE_URL}/profiles/${localStorage.getItem("userId")}/`, {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          })
+          .then((res) => {
+            setUserInfo(res.data);
+          });
+      } catch (err) {
+        console.log(err);
+      }
     };
 
     fetchUserInfo();
   }, []);
 
-  const updatePostsMade = () => {
+  const updatePostsMade = async () => {
     if (userInfo) {
-      axios
-        .patch(
-          `${API_BASE_URL}/profiles/${userInfo.user}/`,
-          {
-            user: userInfo.user,
-            id: userInfo.id,
-            userat: userInfo.userat,
-            posts_made: Number(userInfo.posts_made) + 1,
-          },
-          {
-            headers: {
-              Authorization: `Token ${localStorage.getItem("token")}`,
+      try {
+        await axios
+          .patch(
+            `${API_BASE_URL}/profiles/${userInfo.user}/`,
+            {
+              user: userInfo.user,
+              id: userInfo.id,
+              userat: userInfo.userat,
+              posts_made: Number(userInfo.posts_made) + 1,
             },
-          }
-        )
-        .then((res) => {
-          console.log("Perfil atualizado", res);
-        })
-        .catch((res) => {
-          console.log("Erro na atualizacao do perfil", res);
-        });
+            {
+              headers: {
+                Authorization: `Token ${localStorage.getItem("token")}`,
+              },
+            }
+          )
+          .then((res) => {
+            console.log("Perfil atualizado", res);
+          })
+          .catch((res) => {
+            console.log("Erro na atualizacao do perfil", res);
+          });
+      } catch (err) {
+        console.log(err);
+      }
     }
   };
 

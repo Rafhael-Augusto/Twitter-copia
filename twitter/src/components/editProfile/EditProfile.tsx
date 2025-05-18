@@ -182,7 +182,7 @@ function EditProfile({ isEditOpen, setIsEditOpen }: Prop) {
 
         <S.UsernameBio>
           <S.NewUsername
-            maxLength={30}
+            maxLength={23}
             onChange={(e) =>
               setState((prev) => ({ ...prev, username: e.target.value }))
             }

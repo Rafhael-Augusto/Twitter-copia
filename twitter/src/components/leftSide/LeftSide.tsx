@@ -22,15 +22,23 @@ function LeftSide() {
   };
 
   useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/profiles/${localStorage.getItem("userId")}/`, {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`,
-        },
-      })
-      .then((res) => {
-        setUserInfo(res.data);
-      });
+    const fetchData = async () => {
+      try {
+        await axios
+          .get(`${API_BASE_URL}/profiles/${localStorage.getItem("userId")}/`, {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          })
+          .then((res) => {
+            setUserInfo(res.data);
+          });
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const logOut = () => {

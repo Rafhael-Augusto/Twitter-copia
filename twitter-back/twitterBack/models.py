@@ -8,8 +8,8 @@ from django.db.models import TextField, IntegerField
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     username = models.TextField(null=True, blank=False, default='Novo Usuario', max_length=30)
-    profile = models.ImageField(upload_to='uploads/', blank=True, null=True)
-    banner = models.ImageField(upload_to='uploads/', blank=True, null=True)
+    profile = models.ImageField(upload_to='uploads/', blank=True, null=True, default='defaults/profilePicture.jpg')
+    banner = models.ImageField(upload_to='uploads/', blank=True, null=True, default='defaults/banner.jpg')
     created_at = models.DateField(auto_now_add=True)
     following_ids = ArrayField(models.IntegerField(), blank=True, default=list)
     followers_ids = ArrayField(models.IntegerField(), blank=True, default=list)
@@ -18,7 +18,7 @@ class Profile(models.Model):
     posts_visited = ArrayField(models.IntegerField(), blank=True, default=list)
     replies_liked = ArrayField(models.IntegerField(), blank=True, default=list)
     posts_made = IntegerField(default=0)
-    bio = TextField(null=True, blank=True, max_length=120)
+    bio = TextField(null=True, blank=True, max_length=120, default='Bio')
 
     def __str__(self):
         return self.user.username

@@ -10,12 +10,15 @@ import API_BASE_URL from "../../config/api";
 import type { PostApiType, ProfileApiType } from "../../types";
 
 import * as S from "./styles";
+import PageLoading from "../loadingPage/LoadingPage";
 
 function App() {
-  const [isForYou, setIsForYou] = useState(true);
-  const [posts, setPosts] = useState<[PostApiType] | []>([]);
-
-  const [userInfo, setUserInfo] = useState<ProfileApiType>();
+  const [state, setState] = useState({
+    isForYou: true,
+    posts: undefined as [PostApiType] | undefined,
+    userInfo: undefined as ProfileApiType | undefined,
+    isLoaded: false,
+  });
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -36,10 +39,14 @@ function App() {
           }),
         ]);
 
-        setUserInfo(userRes.data);
-        setPosts(postsRes.data);
+        setState((prev) => ({ ...prev, userInfo: userRes.data }));
+        setState((prev) => ({ ...prev, posts: postsRes.data }));
       } catch (err) {
         console.log("Erro ao pegar informacoes", err);
+      } finally {
+        setInterval(() => {
+          setState((prev) => ({ ...prev, isLoaded: true }));
+        }, 1000);
       }
     };
 
@@ -49,13 +56,13 @@ function App() {
   }, []);
 
   const forYouStyle = {
-    borderBottom: isForYou ? "2px solid #1d90e0" : "1px solid #303336",
-    color: isForYou ? "#fff" : "rgba(255, 255, 255, 0.5)",
+    borderBottom: state.isForYou ? "2px solid #1d90e0" : "1px solid #303336",
+    color: state.isForYou ? "#fff" : "rgba(255, 255, 255, 0.5)",
   };
 
   const followingStyle = {
-    borderBottom: !isForYou ? "2px solid #1d90e0" : "1px solid #303336",
-    color: !isForYou ? "#fff" : "rgba(255, 255, 255, 0.5)",
+    borderBottom: !state.isForYou ? "2px solid #1d90e0" : "1px solid #303336",
+    color: !state.isForYou ? "#fff" : "rgba(255, 255, 255, 0.5)",
   };
 
   return (
@@ -63,11 +70,14 @@ function App() {
       <LeftSide />
       <S.FeedPosts>
         <S.ChangeFeed>
-          <S.SelectedFeed onClick={() => setIsForYou(true)} style={forYouStyle}>
+          <S.SelectedFeed
+            onClick={() => setState((prev) => ({ ...prev, isForYou: true }))}
+            style={forYouStyle}
+          >
             Para você
           </S.SelectedFeed>
           <S.SelectedFeed
-            onClick={() => setIsForYou(false)}
+            onClick={() => setState((prev) => ({ ...prev, isForYou: true }))}
             style={followingStyle}
           >
             Seguindo
@@ -76,20 +86,26 @@ function App() {
 
         <CreateNewPost />
 
-        {isForYou && posts
-          ? posts.map((item) => (
-              <li key={item.id}>
-                <Post item={item} />
-              </li>
-            ))
-          : posts.map((item) => {
-              if (userInfo?.following_ids.includes(item.user))
-                return (
+        {state.isLoaded ? (
+          <>
+            {state.isForYou && state.posts
+              ? state.posts.map((item) => (
                   <li key={item.id}>
                     <Post item={item} />
                   </li>
-                );
-            })}
+                ))
+              : state.posts?.map((item) => {
+                  if (state.userInfo?.following_ids.includes(item.user))
+                    return (
+                      <li key={item.id}>
+                        <Post item={item} />
+                      </li>
+                    );
+                })}
+          </>
+        ) : (
+          <PageLoading />
+        )}
       </S.FeedPosts>
     </S.Container>
   );

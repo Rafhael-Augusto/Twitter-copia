@@ -50,7 +50,7 @@ function UserProfile() {
               Authorization: `Token ${localStorage.getItem("token")}`,
             },
           }),
-          axios.get(`${API_BASE_URL}/profiles/${userId}/`, {
+          axios.get(`${API_BASE_URL}/profiles/${Number(userId)}/`, {
             headers: {
               Authorization: `Token ${localStorage.getItem("token")}`,
             },
@@ -61,11 +61,14 @@ function UserProfile() {
         setState((prev) => ({ ...prev, posts: postsRes.data }));
         setState((prev) => ({ ...prev, userReplies: repliesRes.data }));
         setState((prev) => ({ ...prev, ownerInfo: ownerRes.data }));
+
+        setInterval(() => {
+          setState((prev) => ({ ...prev, loading: false }));
+        }, 1000);
       } catch (err) {
         console.log("Erro ao carregar perfil", err);
       } finally {
         console.log("carregado");
-        setState((prev) => ({ ...prev, loading: false }));
       }
     };
 
@@ -86,7 +89,7 @@ function UserProfile() {
                 },
               }
             ),
-            axios.get(`${API_BASE_URL}/profiles/${userId}`, {
+            axios.get(`${API_BASE_URL}/profiles/${Number(userId)}`, {
               headers: {
                 Authorization: `Token ${localStorage.getItem("token")}`,
               },
@@ -104,27 +107,47 @@ function UserProfile() {
   }, [state.editOpen, userId]);
 
   const followUser = async () => {
-    if (!state.userInfo) return;
+    if (!state.userInfo || !state.ownerInfo) return;
 
     const isFollowing = state.userInfo.following_ids.includes(Number(userId));
     const updatedList = isFollowing
       ? state.userInfo.following_ids.filter((user) => user !== Number(userId))
       : [...state.userInfo.following_ids, Number(userId)];
 
-    try {
-      await axios.patch(
-        `${API_BASE_URL}/profiles/${userId}/`,
-        {
-          following_ids: updatedList,
-        },
-        {
-          headers: {
-            Authorization: `Token ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+    const updatedListOwner = isFollowing
+      ? state.ownerInfo?.followers_ids.filter(
+          (user) => user !== state.userInfo?.id
+        )
+      : [...state.ownerInfo.followers_ids, state.userInfo.id];
 
-      const [profileRes] = await Promise.all([
+    try {
+      await Promise.all([
+        axios.patch(
+          `${API_BASE_URL}/profiles/${localStorage.getItem("userId")}/`,
+          {
+            following_ids: updatedList,
+          },
+          {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }
+        ),
+
+        axios.patch(
+          `${API_BASE_URL}/profiles/${Number(userId)}/`,
+          {
+            followers_ids: updatedListOwner,
+          },
+          {
+            headers: {
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }
+        ),
+      ]);
+
+      const [userRes, ownerRes] = await Promise.all([
         axios.get(
           `${API_BASE_URL}/profiles/${localStorage.getItem("userId")}/`,
           {
@@ -133,8 +156,15 @@ function UserProfile() {
             },
           }
         ),
+
+        axios.get(`${API_BASE_URL}/profiles/${Number(userId)}`, {
+          headers: {
+            Authorization: `Token ${localStorage.getItem("token")}`,
+          },
+        }),
       ]);
-      setState((prev) => ({ ...prev, userInfo: profileRes.data }));
+      setState((prev) => ({ ...prev, userInfo: userRes.data }));
+      setState((prev) => ({ ...prev, ownerInfo: ownerRes.data }));
     } catch (err) {
       console.error("Erro ao seguir/deixar de seguir", err);
     }
@@ -149,8 +179,6 @@ function UserProfile() {
   };
 
   const changeButtonText = () => {
-    console.log(state.userInfo?.id);
-    console.log(Number(userId));
     if (state.userInfo?.id === Number(userId)) {
       return "Editar perfil";
     } else if (
